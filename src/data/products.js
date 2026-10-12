@@ -6,6 +6,7 @@ export const products = [
     name: 'Lavanta Rüyası',
     category: 'kokulu',
     price: 350,
+    stock: 12,
     description: 'Lavanta kokulu soya mumu. Huzurlu akşamlar için.',
   },
   {
@@ -13,6 +14,7 @@ export const products = [
     name: 'Amber Akşamı',
     category: 'kavanoz',
     price: 420,
+    stock: 0,
     description: 'Cam kavanozda, amber ve vanilyanın sıcak buluşması.',
   },
   {
@@ -20,6 +22,10 @@ export const products = [
     name: 'Mini Teraryum Mum',
     category: 'dekoratif',
     price: 280,
+    stock: 5,
     description: 'Seramik kasede, kokusuz. Masanıza küçük bir doğa köşesi.',
   },
 ]
+
+// Tükenme durumu ayrıca saklanmaz, her zaman stoktan türetilir.
+export const isSoldOut = (product) => product.stock <= 0
