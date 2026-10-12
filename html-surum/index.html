@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumie Mum Atölyesi</title>
+  <style>
+    :root {
+      --krem: #fbf5ea;
+      --krem-koyu: #f3e6cf;
+      --bal: #d99a3d;
+      --bal-koyu: #b27624;
+      --kahve: #4a3424;
+      --kahve-acik: #7a5f4a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background-color: var(--krem);
+      color: var(--kahve);
+      line-height: 1.6;
+    }
+
+    header {
+      text-align: center;
+      padding: 4rem 1.5rem 3rem;
+      background: linear-gradient(180deg, var(--krem-koyu), var(--krem));
+      border-bottom: 1px solid #e8d6b8;
+    }
+
+    header h1 {
+      font-size: 2.6rem;
+      font-weight: normal;
+      letter-spacing: 0.04em;
+    }
+
+    header h1 span {
+      color: var(--bal-koyu);
+    }
+
+    .slogan {
+      margin-top: 0.75rem;
+      font-style: italic;
+      color: var(--kahve-acik);
+      font-size: 1.15rem;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    main h2 {
+      text-align: center;
+      font-weight: normal;
+      font-size: 1.6rem;
+      margin-bottom: 2rem;
+    }
+
+    .urunler {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.75rem;
+    }
+
+    .kart {
+      background-color: #fffaf2;
+      border: 1px solid #ecdcc0;
+      border-radius: 14px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 14px rgba(178, 118, 36, 0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .kart:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 22px rgba(178, 118, 36, 0.16);
+    }
+
+    .alev {
+      width: 14px;
+      height: 22px;
+      margin: 0 auto 1.25rem;
+      background: radial-gradient(circle at 50% 70%, #ffe7a8, var(--bal));
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    }
+
+    .kart h3 {
+      font-size: 1.3rem;
+      font-weight: normal;
+      margin-bottom: 0.5rem;
+    }
+
+    .kart p {
+      color: var(--kahve-acik);
+      font-size: 0.98rem;
+      min-height: 3em;
+    }
+
+    .fiyat {
+      display: inline-block;
+      margin-top: 1.25rem;
+      padding: 0.35rem 1.1rem;
+      background-color: var(--bal);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.9rem;
+      color: var(--kahve-acik);
+      border-top: 1px solid #e8d6b8;
+      background-color: var(--krem-koyu);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Lumie <span>Mum Atölyesi</span></h1>
+    <p class="slogan">Elde dökülen, kalbe dokunan sıcak ışıklar.</p>
+  </header>
+
+  <main>
+    <h2>Ürünlerimiz</h2>
+
+    <section class="urunler">
+      <article class="kart">
+        <div class="alev"></div>
+        <h3>Lavanta Rüyası</h3>
+        <p>Lavanta kokulu soya mumu. Huzurlu akşamlar için.</p>
+        <span class="fiyat">350 TL</span>
+      </article>
+
+      <article class="kart">
+        <div class="alev"></div>
+        <h3>Amber Akşamı</h3>
+        <p>Cam kavanozda, amber ve vanilyanın sıcak buluşması.</p>
+        <span class="fiyat">420 TL</span>
+      </article>
+
+      <article class="kart">
+        <div class="alev"></div>
+        <h3>Mini Teraryum Mum</h3>
+        <p>Seramik kasede, kokusuz. Masanıza küçük bir doğa köşesi.</p>
+        <span class="fiyat">280 TL</span>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2026 Lumie Mum Atölyesi · El yapımı, sevgiyle.
+  </footer>
+
+</body>
+</html>
