@@ -64,8 +64,8 @@ main h2 {
 }
 
 .kart {
-  background-color: #fffaf2;
-  border: 1px solid #ecdcc0;
+  background-color: var(--krem);
+  border: 1px solid var(--krem-koyu);
   border-radius: 14px;
   padding: 1.5rem 1.5rem 1.5rem;
   display: flex;
