@@ -6,7 +6,7 @@ export default function App() {
     <>
       <header>
         <h1>Lumie <span>Mum Atölyesi</span></h1>
-        <p className="slogan">Elde dökülen, kalbe dokunan sıcak ışıklar.</p>
+        <p className="slogan">El yapımı, kalbe dokunan sıcak ışıklar.</p>
       </header>
 
       <main>
