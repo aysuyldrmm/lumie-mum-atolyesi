@@ -22,6 +22,8 @@ El yapımı mum ve mum aksesuarları.
 
 Site içeriği Türkçe.
 
+Claude kullanıcıyla Türkçe iletişim kurar.
+
 ## Tasarım tonu
 
 Sıcak ve sade, krem ve bal rengi tonlarında.
