@@ -37,7 +37,7 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - Stok yalnızca `products.js` içindeki `stock` alanında (eldeki adet) tutulur. Ayrı bir "tükendi" alanı tutulmaz; tükenme durumu her zaman `products.js`'deki `isSoldOut(product)` ile belirlenir.
 - Ürün fotoğrafları `public/images/<id>.png` dosyalarındadır ve `products.js`'deki `image` alanıyla (`/images/<id>.png`) bağlanır. Fotoğraf yoksa ya da yüklenemezse `ProductImage` alev simgesini gösterir.
 - Ürün `id` değerleri webhook'a `productId` olarak gideceği için değiştirilmez.
-- Bileşenler `src/components/` altında: `ProductList` → `ProductCard` → `ProductImage`; formlar için `ProductCard` → `FormDialog` → `OrderForm` / `StockNotificationForm`.
+- Bileşenler `src/components/` altında: `ProductList` → `ProductCard` → `ProductImage`; formlar için `ProductCard` → `FormDialog` → `OrderForm` / `StockNotificationForm`. Ürün listesinin altındaki `CatalogQRCode`, sayfanın adresini `qrcode.react` ile karekod olarak gösterir.
 - Webhook payload'larının hazırlanması, doğrulama ve gönderim `src/data/webhook.js` içindedir. Webhook adresi `.env.local`'daki `VITE_WEBHOOK_URL`'den okunur, koda yazılmaz.
 - `html-surum/index.html` eski, yalnızca HTML/CSS sürümüdür; referans olarak saklanır, düzenlenmez.
 

@@ -203,6 +203,30 @@ main h2 {
   background-color: var(--kahve-acik);
 }
 
+/* Karekodun açık zemini (--krem) taranabilmesi için kenar boşluğu görevi görür. */
+.katalog-qr {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.katalog-qr h3 {
+  font-size: 1.1rem;
+  font-weight: normal;
+  color: var(--kahve-acik);
+}
+
+.karekod {
+  padding: 0.9rem;
+  background-color: var(--krem);
+  color: var(--kahve);
+  border: 1px solid var(--krem-koyu);
+  border-radius: 14px;
+  box-sizing: content-box;
+}
+
 /* Form penceresi. Kenar boşluğu .pencere-ic'te: dialog öğesinin kendisine
    gelen tıklama arka plana tıklama sayılır ve pencereyi kapatır. */
 .pencere {

@@ -1,3 +1,4 @@
+import CatalogQRCode from './components/CatalogQRCode.jsx'
 import ProductList from './components/ProductList.jsx'
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
       <main>
         <h2>Ürünlerimiz</h2>
         <ProductList />
+        <CatalogQRCode />
       </main>
 
       <footer>
