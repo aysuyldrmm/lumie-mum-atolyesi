@@ -7,6 +7,7 @@ export const products = [
     category: 'kokulu',
     price: 350,
     stock: 12,
+    image: '/images/lavanta-ruyasi.png',
     description: 'Lavanta kokulu soya mumu. Huzurlu akşamlar için.',
   },
   {
@@ -15,6 +16,7 @@ export const products = [
     category: 'kavanoz',
     price: 420,
     stock: 0,
+    image: '/images/amber-aksami.png',
     description: 'Cam kavanozda, amber ve vanilyanın sıcak buluşması.',
   },
   {
@@ -23,6 +25,7 @@ export const products = [
     category: 'dekoratif',
     price: 280,
     stock: 5,
+    image: '/images/mini-teraryum-mum.png',
     description: 'Seramik kasede, kokusuz. Masanıza küçük bir doğa köşesi.',
   },
 ]

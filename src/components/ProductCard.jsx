@@ -19,7 +19,7 @@ export default function ProductCard({ product }) {
         </span>
         {soldOut && <span className="tukendi-etiketi">Tükendi</span>}
       </div>
-      <ProductImage />
+      <ProductImage product={product} />
       <h3>{product.name}</h3>
       <p>{product.description}</p>
       <div className="kart-alt">
