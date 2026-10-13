@@ -22,26 +22,73 @@ body {
 
 header {
   text-align: center;
-  padding: 4rem 1.5rem 3rem;
-  background: linear-gradient(180deg, var(--krem-koyu), var(--krem));
-  border-bottom: 1px solid #e8d6b8;
+  padding: clamp(3rem, 8vw, 5rem) 1.25rem clamp(2.5rem, 6vw, 3.5rem);
+  background:
+    /* Işık halesi: --bal (#d99a3d) */
+    radial-gradient(ellipse 60% 70% at 50% 0%, rgba(217, 154, 61, 0.22), rgba(217, 154, 61, 0) 70%),
+    linear-gradient(180deg, var(--krem-koyu), var(--krem));
+  /* Kenarlık rengi: --bal-koyu (#b27624) */
+  border-bottom: 1px solid rgba(178, 118, 36, 0.18);
 }
 
 header h1 {
-  font-size: 2.6rem;
+  font-size: clamp(2.1rem, 6vw + 0.5rem, 3rem);
   font-weight: normal;
   letter-spacing: 0.04em;
+  line-height: 1.2;
+  color: var(--kahve);
+  text-wrap: balance;
 }
 
 header h1 span {
   color: var(--bal-koyu);
+  font-style: italic;
+  white-space: nowrap;
 }
 
 .slogan {
-  margin-top: 0.75rem;
+  max-width: 32ch;
+  margin: 1rem auto 0;
   font-style: italic;
   color: var(--kahve-acik);
-  font-size: 1.15rem;
+  font-size: clamp(1rem, 0.9rem + 0.6vw, 1.2rem);
+}
+
+/* Başlığın üstündeki süs alevi. İçeriği boş olduğu için ekran okuyucular okumaz. */
+header h1::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 22px;
+  margin: 0 auto 1rem;
+  background: radial-gradient(circle at 50% 70%, var(--krem), var(--bal));
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  /* Parıltı rengi: --bal (#d99a3d) */
+  box-shadow: 0 0 18px 6px rgba(217, 154, 61, 0.35);
+  transform-origin: 50% 100%;
+  animation: baslik-alevi 3s ease-in-out infinite;
+}
+
+@keyframes baslik-alevi {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.06, 0.96) rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  header h1::before {
+    animation: none;
+  }
+}
+
+/* Sloganın altındaki ayırıcı çizgi. Renk: --bal (#d99a3d) */
+.slogan::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 2px;
+  margin: 1.25rem auto 0;
+  background: linear-gradient(90deg, rgba(217, 154, 61, 0), var(--bal), rgba(217, 154, 61, 0));
+  border-radius: 2px;
 }
 
 main {

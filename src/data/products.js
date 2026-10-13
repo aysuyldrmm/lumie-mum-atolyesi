@@ -8,16 +8,16 @@ export const products = [
     price: 350,
     stock: 12,
     image: '/images/lavanta-ruyasi.png',
-    description: 'Lavanta kokulu soya mumu. Huzurlu akşamlar için.',
+    description: 'Lila tonlarında, lavanta kokulu bir soya mumu. Huzurlu akşamlarınıza sade ve zarif bir eşlikçi.',
   },
   {
     id: 'amber-aksami',
     name: 'Amber Akşamı',
-    category: 'kavanoz',
+    category: 'kokulu',
     price: 420,
     stock: 0,
     image: '/images/amber-aksami.png',
-    description: 'Cam kavanozda, amber ve vanilyanın sıcak buluşması.',
+    description: 'Bal renginde, silindir biçimli bir soya mumu. Amber ve vanilyanın sıcak buluşması.',
   },
   {
     id: 'mini-teraryum-mum',
@@ -26,7 +26,7 @@ export const products = [
     price: 280,
     stock: 5,
     image: '/images/mini-teraryum-mum.png',
-    description: 'Seramik kasede, kokusuz. Masanıza küçük bir doğa köşesi.',
+    description: 'Seramik kasede yosun, kuru çiçekler ve küçük taşlarla hazırlanmış kokusuz bir mum. Masanıza küçük bir doğa köşesi.',
   },
 ]
 
