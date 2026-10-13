@@ -179,6 +179,117 @@ main h2 {
   background-color: var(--kahve-acik);
 }
 
+/* Form penceresi. Kenar boşluğu .pencere-ic'te: dialog öğesinin kendisine
+   gelen tıklama arka plana tıklama sayılır ve pencereyi kapatır. */
+.pencere {
+  margin: auto;
+  width: calc(100% - 2rem);
+  max-width: 420px;
+  padding: 0;
+  background-color: var(--krem);
+  color: var(--kahve);
+  border: 1px solid var(--krem-koyu);
+  border-radius: 14px;
+  /* Gölge rengi: --bal-koyu (#b27624) */
+  box-shadow: 0 14px 30px rgba(178, 118, 36, 0.24);
+}
+
+.pencere::backdrop {
+  /* Arka plan rengi: --kahve (#4a3424) */
+  background-color: rgba(74, 52, 36, 0.45);
+}
+
+.pencere-ic {
+  padding: 1.5rem;
+}
+
+.pencere-ust {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.pencere-ust h3 {
+  font-size: 1.3rem;
+  font-weight: normal;
+}
+
+.kapat-dugmesi {
+  padding: 0 0.4rem;
+  background: none;
+  border: none;
+  color: var(--kahve-acik);
+  font: inherit;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.kapat-dugmesi:hover {
+  color: var(--bal-koyu);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-urun {
+  color: var(--kahve-acik);
+  font-size: 0.95rem;
+}
+
+.form-alan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.form-alan input {
+  padding: 0.5rem 0.75rem;
+  background-color: var(--krem);
+  color: var(--kahve);
+  border: 1px solid var(--krem-koyu);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.form-alan input:focus {
+  outline: none;
+  border-color: var(--bal);
+}
+
+.alan-hatasi,
+.form-hatasi {
+  color: var(--bal-koyu);
+  font-size: 0.85rem;
+}
+
+.dugme--dolu {
+  background-color: var(--bal-koyu);
+  color: var(--krem);
+}
+
+.dugme--dolu:hover {
+  background-color: var(--kahve);
+  border-color: var(--kahve);
+}
+
+.dugme--dolu:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.onay-mesaji {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
 footer {
   text-align: center;
   padding: 2rem 1rem;

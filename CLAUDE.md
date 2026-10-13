@@ -36,12 +36,13 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - Kategorilerin ekranda görünen adları `src/data/categories.js` içindedir; `products.js` yalnızca kategori kimliğini (`kokulu`, `kavanoz`, `dekoratif`) tutar.
 - Stok yalnızca `products.js` içindeki `stock` alanında (eldeki adet) tutulur. Ayrı bir "tükendi" alanı tutulmaz; tükenme durumu her zaman `products.js`'deki `isSoldOut(product)` ile belirlenir.
 - Ürün `id` değerleri webhook'a `productId` olarak gideceği için değiştirilmez.
-- Bileşenler `src/components/` altında: `ProductList` → `ProductCard` → `ProductImage`.
+- Bileşenler `src/components/` altında: `ProductList` → `ProductCard` → `ProductImage`; formlar için `ProductCard` → `FormDialog` → `OrderForm` / `StockNotificationForm`.
+- Webhook payload'larının hazırlanması, doğrulama ve gönderim `src/data/webhook.js` içindedir. Webhook adresi `.env.local`'daki `VITE_WEBHOOK_URL`'den okunur, koda yazılmaz.
 - `html-surum/index.html` eski, yalnızca HTML/CSS sürümüdür; referans olarak saklanır, düzenlenmez.
 
-## Formlar ve webhook (planlanan)
+## Formlar ve webhook
 
-Karttaki düğme stoka göre değişir. Düğmelere bağlanacak formlar webhook'a şu alanları gönderecek:
+Karttaki düğme stoka göre değişir ve ilgili formu açılır pencerede açar. Formlar webhook'a şu alanları gönderir:
 
 - **Sipariş Ver** (stokta olan ürünler): event, name, productId, productName, phone, email, quantity, source
 - **Stok Bildirimi İste** (tükenen ürünler): event, name, productId, productName, email, source
