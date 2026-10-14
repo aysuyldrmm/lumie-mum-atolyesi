@@ -28,6 +28,24 @@ Claude kullanıcıyla Türkçe iletişim kurar.
 
 Sıcak ve sade, krem ve bal rengi tonlarında.
 
+## Projeyi açma ve kapatma
+
+**Açmak için:**
+
+1. Bir terminal açın (VS Code'da `Terminal > New Terminal` ya da Windows'ta PowerShell).
+2. Proje klasörüne geçin: `cd C:\Users\YOGA\lumie`
+3. İlk kez açıyorsanız (ya da `node_modules` klasörü yoksa) bağımlılıkları kurun: `npm install`
+4. Geliştirme sunucusunu başlatın: `npm run dev`
+5. Terminalde görünen adresi tarayıcıda açın (genellikle `http://localhost:5173/`).
+6. Kodda yaptığınız değişiklikler kaydedince tarayıcıya kendiliğinden yansır; sunucuyu yeniden başlatmanız gerekmez.
+7. Formların webhook'a gidebilmesi için proje klasöründe `.env.local` dosyası ve içinde `VITE_WEBHOOK_URL` bulunmalı. Bu dosyayı değiştirirseniz sunucuyu kapatıp yeniden açın.
+
+**Kapatmak için:**
+
+1. Sunucunun çalıştığı terminale tıklayın.
+2. `Ctrl + C` tuşlarına basın. Onay sorulursa `Y` yazıp Enter'a basın.
+3. Tarayıcı sekmesini kapatabilirsiniz; sunucu kapandıktan sonra sayfa yenilenirse açılmaz, bu normaldir.
+
 ## Mimari ve React geçişi
 
 - Proje Vite + React ile çalışır. Geliştirme sunucusu: `npm run dev`.
