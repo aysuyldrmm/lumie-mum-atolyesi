@@ -4,3 +4,11 @@ export const categoryLabels = {
   kavanoz: 'Kavanoz Mum',
   dekoratif: 'Dekoratif Mum',
 }
+
+// Kategori filtresindeki düğmelerde görünen kısa adlar. Düğmelerin sırası
+// buradaki sıradır.
+export const categoryShortLabels = {
+  kokulu: 'Kokulu',
+  kavanoz: 'Kavanoz',
+  dekoratif: 'Dekoratif',
+}
