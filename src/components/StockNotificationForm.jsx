@@ -1,9 +1,5 @@
 import { useState } from 'react'
-import {
-  buildStockNotificationPayload,
-  sendToWebhook,
-  validateStockNotification,
-} from '../data/webhook.js'
+import { sendStockNotification, validateStockNotification } from '../data/webhook.js'
 
 export default function StockNotificationForm({ product, onDone }) {
   const [values, setValues] = useState({ name: '', email: '' })
@@ -22,10 +18,15 @@ export default function StockNotificationForm({ product, onDone }) {
 
     setStatus('sending')
     try {
-      await sendToWebhook(buildStockNotificationPayload(product, values))
+      await sendStockNotification(product, values)
       setStatus('success')
-    } catch {
-      setStatus('error')
+    } catch (error) {
+      if (error.errors) {
+        setErrors(error.errors)
+        setStatus('idle')
+      } else {
+        setStatus('error')
+      }
     }
   }
 

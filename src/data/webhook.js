@@ -1,4 +1,5 @@
-// Formlardan webhook'a giden veri burada hazırlanır ve gönderilir.
+// Form doğrulaması ve webhook payload'ı burada hazırlanır. Dosya hem tarayıcıda
+// (anında hata göstermek için) hem api/ altındaki sunucu kodunda kullanılır.
 // event, source, productId ve productName formlardan değil buradan gelir.
 const SOURCE = 'lumie-web'
 
@@ -72,14 +73,22 @@ export function validateStockNotification(values) {
   return validateNameAndEmail(values)
 }
 
-export async function sendToWebhook(payload) {
-  const url = import.meta.env.VITE_WEBHOOK_URL
-  if (!url) throw new Error('VITE_WEBHOOK_URL tanımlı değil.')
-
-  const response = await fetch(url, {
+// Tarayıcı yalnızca kendi API route'umuza gönderir; ürün adı gibi sabit
+// alanları sunucu ekler. Sunucu alan hatası dönerse `error.errors`'ta gelir.
+async function sendToApi(path, product, values) {
+  const response = await fetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ productId: product.id, ...values }),
   })
-  if (!response.ok) throw new Error(`Webhook yanıtı: ${response.status}`)
+  if (!response.ok) {
+    const error = new Error(`API yanıtı: ${response.status}`)
+    error.errors = (await response.json().catch(() => ({}))).errors
+    throw error
+  }
 }
+
+export const sendOrder = (product, values) => sendToApi('/api/order', product, values)
+
+export const sendStockNotification = (product, values) =>
+  sendToApi('/api/stock-notification', product, values)

@@ -38,7 +38,7 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 4. Geliştirme sunucusunu başlatın: `npm run dev`
 5. Terminalde görünen adresi tarayıcıda açın (genellikle `http://localhost:5173/`).
 6. Kodda yaptığınız değişiklikler kaydedince tarayıcıya kendiliğinden yansır; sunucuyu yeniden başlatmanız gerekmez.
-7. Formların webhook'a gidebilmesi için proje klasöründe `.env.local` dosyası ve içinde `VITE_WEBHOOK_URL` bulunmalı. Bu dosyayı değiştirirseniz sunucuyu kapatıp yeniden açın.
+7. Formların webhook'a gidebilmesi için proje klasöründe `.env.local` dosyası ve içinde `WEBHOOK_URL` bulunmalı. Dosya yoksa `.env.example`'ı `.env.local` adıyla kopyalayıp webhook.site test adresini yazın. Bu dosyayı değiştirirseniz sunucuyu kapatıp yeniden açın.
 
 **Kapatmak için:**
 
@@ -57,8 +57,17 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - Ürün `id` değerleri webhook'a `productId` olarak gideceği için değiştirilmez.
 - Kategori filtresindeki düğmelerin kısa adları ve sırası `src/data/categories.js`'deki `categoryShortLabels`'dadır. Yeni bir kategori eklenirse hem `categoryLabels`'a hem buraya eklenmeli.
 - Bileşenler `src/components/` altında: `ProductList` → `ProductCard` → `ProductImage`; `ProductList` seçili kategoriyi tutar ve listenin üstünde `CategoryFilter` düğmelerini gösterir (ürünü olmayan kategorilerin düğmesi gizlenir); formlar için `ProductCard` → `FormDialog` → `OrderForm` / `StockNotificationForm`. Ürün listesinin altındaki `CatalogQRCode`, sayfanın adresini `qrcode.react` ile karekod olarak gösterir.
-- Webhook payload'larının hazırlanması, doğrulama ve gönderim `src/data/webhook.js` içindedir. Webhook adresi `.env.local`'daki `VITE_WEBHOOK_URL`'den okunur, koda yazılmaz.
+- Formlar webhook'a doğrudan değil, sitenin kendi API route'ları üzerinden gider: tarayıcı → `/api/order` ya da `/api/stock-notification` → webhook. Route'lar `api/` klasöründedir (Vercel Functions, `export function POST(request)`); ortak akış `api/_lib/handle-form.js`'tedir. Sunucu ürünü `productId` ile `products.js`'ten bulur, doğrulamayı yeniden yapar ve payload'ı kendisi hazırlar.
+- Doğrulama ve payload hazırlama `src/data/webhook.js` içindedir; bu dosya hem tarayıcıda hem sunucuda kullanılır, bu yüzden içine `import.meta.env` ya da `process.env` yazılmaz.
+- Webhook adresi yalnızca sunucudaki `WEBHOOK_URL` ortam değişkenindedir (`VITE_` öneki **olmamalı**, yoksa tarayıcı koduna gömülür). Yerelde `.env.local`'dan, yayında Vercel panelinden okunur.
+- `npm run dev` sırasında `api/` route'larını `vite.config.js`'deki `devApi` eklentisi çalıştırır; ayrıca `vercel dev` gerekmez.
 - `html-surum/index.html` eski, yalnızca HTML/CSS sürümüdür; referans olarak saklanır, düzenlenmez.
+
+## Yayına alma (Vercel)
+
+1. vercel.com'da GitHub ile giriş yapın, **Add New → Project** ile `aysuyldrmm/lumie-mum-atolyesi` deposunu seçin. Framework "Vite" olarak kendiliğinden seçilir.
+2. **Settings → Environment Variables** bölümüne `WEBHOOK_URL` ekleyin: **Production** için gerçek webhook adresi, **Preview** için webhook.site test adresi.
+3. Deploy edin. Sonrasında her `main` push'u yayına otomatik çıkar. `WEBHOOK_URL`'i değiştirirseniz değişikliğin geçmesi için yeniden deploy edin.
 
 ## Formlar ve webhook
 

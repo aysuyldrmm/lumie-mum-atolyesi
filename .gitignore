@@ -1,4 +1,7 @@
 node_modules
 dist
-.env.local
+# Ortam dosyaları (webhook adresi vb.) commit'lenmez; yalnızca örnek dosya commit'lenir.
+.env*
+!.env.example
+.vercel
 desktop.ini

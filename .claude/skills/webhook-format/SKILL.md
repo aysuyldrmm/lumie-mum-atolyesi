@@ -7,10 +7,12 @@ description: Lumie sitesindeki formlardan (Sipariş Ver, Stok Bildirimi İste) w
 
 ## Genel
 
-- İstek `POST` ile gönderilir, gövde JSON olur: `Content-Type: application/json`.
-- Webhook adresi `import.meta.env.VITE_WEBHOOK_URL` değişkeninden okunur, koda yazılmaz.
+- Akış: tarayıcı → sitenin API route'u (`/api/order`, `/api/stock-notification`) → webhook. Tarayıcı webhook'a **asla** doğrudan gitmez.
+- Tarayıcı API route'una yalnızca `productId` ve formun alanlarını gönderir. Sunucu ürünü `products.js`'ten bulur, doğrulamayı (`validateOrder` / `validateStockNotification`) yeniden yapar ve payload'ı kendisi hazırlar.
+- Webhook'a giden istek `POST` ile gönderilir, gövde JSON olur: `Content-Type: application/json`.
+- Webhook adresi yalnızca sunucuda `process.env.WEBHOOK_URL`'den okunur. `VITE_` önekli bir değişken ya da `import.meta.env` kullanılmaz, çünkü bunlar tarayıcı koduna gömülür.
 - Payload'da **yalnızca** aşağıda listelenen alanlar bulunur. Fazla alan (fiyat, kategori, zaman damgası vb.) ya da eksik alan olmaz.
-- `event`, `source`, `productId` ve `productName` formlar tarafından değil, payload'ı oluşturan ortak fonksiyonlar tarafından doldurulur. Kullanıcı bu alanları göremez ve değiştiremez.
+- `event`, `source`, `productId` ve `productName` sunucuda, payload'ı oluşturan ortak fonksiyonlar tarafından doldurulur. Tarayıcıdan bu adlarla bir değer gelse bile yok sayılır.
 
 ## Sipariş Ver
 
@@ -72,22 +74,23 @@ Yalnızca tükenen ürünler için, yani `isSoldOut(product)` doğruysa gösteri
 
 - `<input type="number">` alanının değeri **metin** olarak gelir. `quantity` alanına koymadan önce `Number(...)` ile sayıya çevrilir.
 - Ürün `id` değerleri değiştirilmez, çünkü webhook tarafında ürünler bu kimliklerle eşleştirilir.
-- Gönderim başarısız olursa (ağ hatası ya da 2xx dışında bir yanıt) kullanıcıya hata mesajı gösterilir ve girdiği bilgiler silinmez.
+- Gönderim başarısız olursa (ağ hatası ya da 2xx dışında bir yanıt) kullanıcıya hata mesajı gösterilir ve girdiği bilgiler silinmez. API route alan hatası dönerse (`400` ve `{ errors }`) hata ilgili alanın altında gösterilir.
+- API route yanıtları: geçersiz istek, bilinmeyen ya da uygun olmayan ürün, doğrulama hatası → `400`; `WEBHOOK_URL` tanımsız → `500`; webhook hatası ya da zaman aşımı → `502`; başarı → `200`.
 
 ## webhook.site ile test
 
 1. https://webhook.site adresini açın. Sayfa size özel bir adres verir (`https://webhook.site/<kimlik>`). Bu adresi kopyalayın.
-2. Proje kökünde bir `.env.local` dosyası oluşturun:
+2. `.env.example`'ı proje kökünde `.env.local` adıyla kopyalayıp adresi yazın:
    ```
-   VITE_WEBHOOK_URL=https://webhook.site/<kimlik>
+   WEBHOOK_URL=https://webhook.site/<kimlik>
    ```
-   `.env.local` commit'lenmemeli; `.gitignore`'da yoksa önce oraya eklenmeli.
-3. `npm run dev` sunucusunu yeniden başlatın. Vite `.env` dosyalarını yalnızca açılışta okur.
+   `.env.local` commit'lenmez; `.gitignore`'daki `.env*` kuralı bunu sağlar.
+3. `npm run dev` sunucusunu yeniden başlatın. Ortam dosyaları yalnızca açılışta okunur.
 4. Stokta olan bir üründen sipariş, tükenen bir üründen stok bildirimi gönderin.
 5. webhook.site sayfasında gelen isteklerin her biri için şunları kontrol edin:
    - Yöntem `POST`, `Content-Type` `application/json`.
    - Alanlar yukarıdaki tablolarla birebir aynı, eksik ya da fazla alan yok.
    - `quantity` tırnaksız bir sayı (`2`), `phone` tırnaklı bir metin (`"0532..."`).
    - `event` ve `source` değerleri doğru.
-6. Tarayıcı isteği CORS hatasıyla engellerse webhook.site'ın ayarlarından CORS başlıklarını açın.
+6. Tarayıcının ağ sekmesinde yalnızca `/api/...` isteği görünmeli; webhook adresi tarayıcıda hiçbir yerde görünmemeli. İstek sunucudan gittiği için CORS ayarı gerekmez.
 7. webhook.site adresini bilen herkes gelen istekleri görebilir. Testte gerçek müşteri bilgisi değil, örnek ad, e-posta ve telefon kullanın.

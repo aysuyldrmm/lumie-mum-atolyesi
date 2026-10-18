@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { buildOrderPayload, sendToWebhook, validateOrder } from '../data/webhook.js'
+import { sendOrder, validateOrder } from '../data/webhook.js'
 
 export default function OrderForm({ product, onDone }) {
   const [values, setValues] = useState({ name: '', phone: '', email: '', quantity: '1' })
@@ -18,10 +18,16 @@ export default function OrderForm({ product, onDone }) {
 
     setStatus('sending')
     try {
-      await sendToWebhook(buildOrderPayload(product, values))
+      await sendOrder(product, values)
       setStatus('success')
-    } catch {
-      setStatus('error')
+    } catch (error) {
+      // Sunucu bir alanı reddettiyse (örneğin stok azaldıysa) hata o alanın altında görünür.
+      if (error.errors) {
+        setErrors(error.errors)
+        setStatus('idle')
+      } else {
+        setStatus('error')
+      }
     }
   }
 
