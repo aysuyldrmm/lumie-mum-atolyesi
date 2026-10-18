@@ -2,11 +2,17 @@
 // event, source, productId ve productName formlardan değil buradan gelir.
 const SOURCE = 'lumie-web'
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// @ işaretinin iki yanındaki parçalar noktayla başlayıp bitemez, art arda
+// nokta içeremez; alan adında en az bir nokta olmalı.
+const EMAIL_PATTERN = /^[^\s@.]+(\.[^\s@.]+)*@[^\s@.]+(\.[^\s@.]+)+$/
 const PHONE_PATTERN = /^\+?\d+$/
 
+// E-posta adreslerinde Türkçe harf yerine yazılması gereken harfler.
+const TURKISH_LETTERS = { ş: 's', ğ: 'g', ü: 'u', ö: 'o', ç: 'c', ı: 'i' }
+
 const cleanName = (name) => name.trim()
-const cleanEmail = (email) => email.trim().toLowerCase()
+// toLowerCase() büyük İ'yi "i + görünmez nokta" yapar; önce düz i'ye çevrilir.
+const cleanEmail = (email) => email.trim().replace(/İ/g, 'i').toLowerCase()
 // Telefon metin olarak kalır; sayıya çevrilirse baştaki 0 ya da + kaybolur.
 const cleanPhone = (phone) => phone.replace(/\s/g, '')
 
@@ -37,7 +43,14 @@ export function buildStockNotificationPayload(product, { name, email }) {
 function validateNameAndEmail({ name, email }) {
   const errors = {}
   if (!cleanName(name)) errors.name = 'Lütfen adınızı yazın.'
-  if (!EMAIL_PATTERN.test(cleanEmail(email))) {
+  const cleanedEmail = cleanEmail(email)
+  const turkishLetters = [...new Set(cleanedEmail)].filter((letter) => letter in TURKISH_LETTERS)
+  if (turkishLetters.length > 0) {
+    const fixes = turkishLetters
+      .map((letter) => `"${letter}" yerine "${TURKISH_LETTERS[letter]}"`)
+      .join(', ')
+    errors.email = `E-posta adresinde Türkçe harf kullanılamaz, lütfen ${fixes} yazın.`
+  } else if (!EMAIL_PATTERN.test(cleanedEmail)) {
     errors.email = 'Lütfen geçerli bir e-posta adresi yazın.'
   }
   return errors
