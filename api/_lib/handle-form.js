@@ -6,7 +6,24 @@ import { checkRateLimit } from './rate-limit.js'
 
 const WEBHOOK_TIMEOUT_MS = 10000
 
-export async function handleForm(request, { fields, acceptsProduct, validate, buildPayload }) {
+// vercel.json'daki güvenlik başlıkları sayfalara ve dosyalara eklenir ama Vercel
+// fonksiyonların yanıtlarına eklemez; API yanıtlarına burada eklenir. Yanıt
+// yalnızca JSON olduğu için CSP her şeyi kapatır.
+const API_SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+  'Cache-Control': 'no-store',
+}
+
+export async function handleForm(request, options) {
+  const response = await processForm(request, options)
+  for (const [key, value] of Object.entries(API_SECURITY_HEADERS)) {
+    response.headers.set(key, value)
+  }
+  return response
+}
+
+async function processForm(request, { fields, acceptsProduct, validate, buildPayload }) {
   const retryAfter = await checkRateLimit(request)
   if (retryAfter !== null) {
     return Response.json(
