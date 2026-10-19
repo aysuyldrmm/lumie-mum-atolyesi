@@ -63,6 +63,9 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - `npm run dev` sırasında `api/` route'larını `vite.config.js`'deki `devApi` eklentisi çalıştırır; ayrıca `vercel dev` gerekmez.
 - API route'ları aynı IP'den dakikada en fazla 10 isteği kabul eder (`api/_lib/rate-limit.js`, `429` döner). Sayaç Upstash Redis'te tutulur (`KV_REST_API_URL` / `KV_REST_API_TOKEN`); bu bilgiler yoksa, örneğin yerelde, bellekteki sayaç kullanılır. Bellekteki sayaç Vercel'de güvenilir değildir, çünkü Vercel kodu birden çok kopyada çalıştırır. Upstash yanıt vermezse istek kabul edilir ve durum loga yazılır.
 - `html-surum/index.html` eski, yalnızca HTML/CSS sürümüdür; referans olarak saklanır, düzenlenmez.
+- Form alanlarının en fazla uzunlukları `src/data/webhook.js`'deki `FIELD_LIMITS`'tedir (ad 100, e-posta 254, telefon 20). Sunucu bu sınırları kontrol eder; formlardaki `maxLength` da aynı sabiti kullanır, sayı bileşene yazılmaz.
+- Güvenlik başlıkları (CSP, X-Frame-Options vb.) `vercel.json`'dadır. Vercel bunları fonksiyon yanıtlarına eklemediği için API yanıtlarının başlıkları `api/_lib/handle-form.js`'te ayrıca eklenir. `npm run preview` aynı başlıklarla çalışır: CSP'yi değiştirdikten ya da başka bir alan adından kaynak (yazı tipi, görsel, betik) ekledikten sonra önce orada deneyin. `npm run dev`'e başlık uygulanmaz.
+- Deploy öncesi kontroller ve bilinen eksikler `docs/guvenlik-kontrol-listesi.md`'dedir.
 - Site iki sayfadan oluşur: `index.html` (mağaza) ve `gizlilik.html` (gizlilik politikası). İkisi de `vite.config.js`'deki `build.rollupOptions.input`'ta tanımlıdır; yeni bir sayfa eklenirse oraya da eklenmelidir.
 
 ## Yayına alma (Vercel)

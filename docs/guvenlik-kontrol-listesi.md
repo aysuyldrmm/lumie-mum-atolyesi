@@ -3,8 +3,9 @@
 Lumie Mum Atölyesi sitesi için hazırlanmıştır. Her maddede kontrolün nasıl yapıldığı (dosya, komut, test) ve sonucu yazılıdır. Gizli değerler (webhook adresi, Upstash anahtarları) bu belgeye bilerek yazılmamıştır; komutlar bu değerleri `.env.local`'dan okuyup yalnızca eşleşme **sayısını** gösterir.
 
 - **Kontrol tarihi:** 19 Ekim 2026
-- **Kontrol edilen kod:** `main` dalı, commit `34cf1b1`
-- **Kontrol edilen yayın:** https://lumie-mum-atolyesi.vercel.app (deploy `lumie-mum-atolyesi-4vk3isyth`)
+- **İlk kontrol:** commit `34cf1b1`, deploy `lumie-mum-atolyesi-4vk3isyth`
+- **Son güncelleme:** commit `f029702`, deploy `lumie-mum-atolyesi-8kj1kz3i7`. Alan uzunluğu sınırları (madde 3) ve güvenlik başlıkları (madde 8) eklenip yayında yeniden test edildi.
+- **Kontrol edilen yayın:** https://lumie-mum-atolyesi.vercel.app
 
 **Durum işaretleri:** ✅ tamam · ⚠️ çalışıyor ama sınırı / riski var · ❌ yapılmamış ya da eksik
 
@@ -14,12 +15,12 @@ Lumie Mum Atölyesi sitesi için hazırlanmıştır. Her maddede kontrolün nas�
 |---|---|---|
 | 1 | `.env` dosyaları hiç commit'lenmemiş | ✅ |
 | 2 | Webhook adresi tarayıcı koduna girmiyor | ✅ |
-| 3 | Sunucu tarafı doğrulama | ⚠️ Alan uzunluğu sınırı yok |
+| 3 | Sunucu tarafı doğrulama | ✅ Alan uzunluğu sınırları eklendi |
 | 4 | Rate limit | ⚠️ Çalışıyor, bilinen sınırları var |
 | 5 | KVKK onayı ve gizlilik politikası | ⚠️ Teknik olarak tamam, hukuki olarak eksik |
 | 6 | Vercel'deki gizli ayarlar | ✅ Birkaç küçük not |
 | 7 | Bağımlılıklar | ✅ |
-| 8 | HTTPS ve güvenlik başlıkları | ❌ 5 başlık eksik |
+| 8 | HTTPS ve güvenlik başlıkları | ✅ Eklendi, yayında doğrulandı |
 | 9 | Webhook'un kendisinin korunması | ❌ İmza ya da gizli anahtar yok |
 | 10 | Bot koruması | ❌ Yok |
 | 11 | Deploy süreci | ⚠️ GitHub bağlantısı yok, deploy'lar elle yapılıyor |
@@ -69,7 +70,7 @@ Lumie Mum Atölyesi sitesi için hazırlanmıştır. Her maddede kontrolün nas�
 
 **Sınır:** Production'daki gerçek webhook adresini bilmediğimiz için yayındaki kodda o adres doğrudan aranamadı. Bilinen tüm webhook servisi desenleri ve değişken adları arandı. Kodda adresin tarayıcıya gidebileceği bir yol yok.
 
-## 3. Sunucu tarafı doğrulama ⚠️
+## 3. Sunucu tarafı doğrulama ✅
 
 **Akış** (`api/_lib/handle-form.js`):
 1. Rate limit.
@@ -102,11 +103,31 @@ Tarayıcıdan gelen `productName`, `event`, `source`, `consentVersion`, `consent
 - 18 e-posta uç durumunun hepsi beklenen sonucu verdi.
 - `WEBHOOK_URL` tanımsızken 500, webhook hata verdiğinde 502 döndü; formda genel hata göründü ve bilgiler silinmedi.
 
-**❌ Eksik: alan uzunluğu sınırı yok.**
-- **Kanıt:** Yerel testte 100.000 karakterlik bir ad `200` aldı ve webhook'a 100.000 karakter olarak ulaştı.
-- **Kod:** `src/data/webhook.js` ve `api/_lib/handle-form.js`'te uzunluk kontrolü yok. Bulunan `length > 0` satırlarının hepsi "hata var mı" kontrolü.
-- **Etki:** Biri webhook'a ve sipariş tablosuna çok büyük kayıtlar yollayabilir. Vercel'in istek gövdesi sınırı (4,5 MB) dışında bir engel yok.
-- **Öneri:** Ad için 100, e-posta için 254, telefon için 20 karakter gibi sınırlar `validateCommonFields` / `validateOrder` içine eklensin; aynı sınırlar `<input maxLength>` olarak formlara da yazılsın.
+**✅ Alan uzunluğu sınırları (commit `a6e8dc3`'te eklendi).**
+- **Önceki durum:** İlk kontrolde uzunluk sınırı yoktu. Yerel testte 100.000 karakterlik bir ad `200` almış ve webhook'a 100.000 karakter olarak ulaşmıştı.
+- **Kod:** `src/data/webhook.js`'deki `FIELD_LIMITS = { name: 100, email: 254, phone: 20 }`. Değerler boşluklar temizlendikten sonra kontrol ediliyor. E-postanın uzunluğuna diğer e-posta kontrollerinden önce bakılıyor, böylece çok uzun bir metin işlenmiyor. Formlardaki `maxLength` aynı sabiti kullanıyor (`OrderForm.jsx`, `StockNotificationForm.jsx`).
+- **Kenar değer testi:** `validateOrder`'ı doğrudan çalıştıran bir betikle yapıldı.
+
+| Girdi | Sonuç |
+|---|---|
+| Ad 100 karakter / 101 karakter | kabul / `Adınız en fazla 100 karakter olabilir.` |
+| Ad 100 karakter + baştaki ve sondaki boşluk | kabul (boşluklar sayılmıyor) |
+| E-posta 254 / 255 karakter | kabul / `E-posta adresi en fazla 254 karakter olabilir.` |
+| E-posta 1.000.000 karakter | ret, 1 ms'de |
+| Telefon 20 / 21 rakam | kabul / `Telefon numarası en fazla 20 karakter olabilir.` |
+| `0532 123 45 67` (temizlenince 11) | kabul |
+
+- **Yayında test (curl):**
+
+| Girdi | Sonuç |
+|---|---|
+| 100.000 karakterlik ad | ✅ `400` + `errors.name` |
+| 101 karakterlik ad | ✅ `400` |
+| 21 haneli telefon | ✅ `400` + `errors.phone` |
+| 310 karakterlik e-posta | ✅ `400` + `errors.email` |
+
+- **Tarayıcı (yayında):** Ad alanına 150 karakter yazılmaya çalışıldığında alan 100 karakterde duruyor. `maxLength` değerleri: ad 100, telefon 20, e-posta 254.
+- **Gerileme:** 18 e-posta testinin hepsi ve onay kutucuğu testleri, güvenlik başlıklı yerel önizlemede (`npm run preview`) yeniden geçti.
 
 ## 4. Rate limit ⚠️
 
@@ -174,15 +195,36 @@ Tarayıcıdan gelen `productName`, `event`, `source`, `consentVersion`, `consent
 - `package-lock.json` commit'li; Vercel aynı sürümleri kuruyor.
 - `@upstash/ratelimit@2.2.0` ve `@upstash/redis@1.39.0`, eklendikleri gün yaklaşık 4 haftalık sürümlerdi (`npm view … time`). Yeni yayınlanmış, denenmemiş sürümler değiller.
 
-## 8. HTTPS ve güvenlik başlıkları ❌
+## 8. HTTPS ve güvenlik başlıkları ✅
 
-**Kontrol:** `curl -sI https://lumie-mum-atolyesi.vercel.app/`
+**Önceki durum:** İlk kontrolde (`34cf1b1`) yalnızca HSTS vardı. CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy ve Permissions-Policy eksikti; `vercel.json` yoktu.
 
-- ✅ **HTTPS:** `http://` → `308` ile `https://` adresine yönlendiriliyor.
-- ✅ **HSTS:** `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (Vercel ekliyor).
-- ❌ **Eksik başlıklar:** `Content-Security-Policy`, `X-Frame-Options` (ya da CSP `frame-ancestors`), `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
-  - **Etki:** Site başka bir sitenin içine çerçeve olarak gömülebilir (clickjacking). Bir XSS açığı çıkarsa onu sınırlayacak bir CSP yok. Sitede kullanıcı içeriği gösterilmediği için XSS riski şu an düşük.
-- **Öneri:** Proje kökünde `vercel.json` yok (`ls vercel.json` → yok). Bu dosyaya `headers` bölümüyle şu başlıklar eklensin: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()` ve dikkatle test edilmiş bir CSP (`default-src 'self'`, görseller ve React için gereken izinlerle).
+**Kod (commit `a6e8dc3`, `f029702`):**
+- **`vercel.json`:** Sayfalar ve dosyalar için şu başlıklar gönderiliyor:
+  - `Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`
+  - `X-Frame-Options: DENY`
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()`
+  - `Cross-Origin-Opener-Policy: same-origin`
+- **`api/_lib/handle-form.js`:** Vercel, `vercel.json` başlıklarını fonksiyon yanıtlarına **eklemiyor**; bunu yayında gördük (`POST /api/order`: 0/7 başlık). Bu yüzden API yanıtlarına `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` ve `Cache-Control: no-store` kodda ekleniyor.
+- **`vite.config.js`:** `npm run preview` aynı başlıkları `vercel.json`'dan okuyup gönderiyor ve API route'larını da çalıştırıyor. Böylece CSP yayına çıkmadan yerelde test edilebiliyor. `npm run dev`'e başlık uygulanmıyor, çünkü Vite'ın anlık yenileme betikleri CSP'ye takılır.
+
+**Yayında test (deploy `8kj1kz3i7`):**
+
+| Kontrol | Sonuç |
+|---|---|
+| `curl -sI /` — 6 yeni başlık + HSTS | ✅ 7/7 |
+| `curl -sI /gizlilik.html` | ✅ 7/7 |
+| `curl -sI /assets/main-….js` | ✅ 7/7 |
+| API yanıtları: `400`, `429` (3 API başlığı) | ✅ 3/3 |
+| `http://` → `https://` | ✅ `308` |
+| CSP ihlali (tarayıcıda `securitypolicyviolation` olayı dinlendi): ana sayfa, gizlilik sayfası, form açma ve gönderme | ✅ 0 ihlal |
+| Sayfa çalışıyor mu (CSP bir şeyi bozdu mu) | ✅ İki sayfa da çiziliyor, 3/3 ürün görseli yükleniyor, karekod (SVG) görünüyor, stiller uygulanıyor |
+| Siteyi başka bir sayfada `<iframe>` ile gömme denemesi | ✅ Engellendi (çerçeve `chrome-error://chromewebdata/` gösteriyor) |
+| Yerel önizlemede formun CSP altında gönderilmesi (yakalama sunucusuyla) | ✅ Başarılı, webhook'a ulaştı |
+
+**Kalan küçük not:** Sitede `favicon.ico` yok, tarayıcı konsolunda bir `404` görünüyor. Güvenlik sorunu değil; bu değişiklikten önce de vardı.
 
 **CORS:** Başka bir siteden gelen ön kontrol isteği (`OPTIONS /api/order`, `Origin: https://kotu-site.example`) `405` alıyor ve `Access-Control-Allow-*` başlığı dönmüyor. Başka sitelerin tarayıcıları API'ye JSON gönderemiyor. curl gibi araçlar gönderebilir, ama onları sunucu doğrulaması ve rate limit karşılıyor.
 
@@ -229,18 +271,24 @@ npm audit --omit=dev               # 0 vulnerabilities
 npm run build                      # hatasız
 grep -rlE 'webhook\.site|WEBHOOK_URL|KV_REST|upstash\.io' dist  # çıktı vermemeli
 vercel env ls                      # VITE_ önekli değişken olmamalı
+npm run preview                    # CSP açıkken sayfalar ve formlar çalışıyor mu (tarayıcı konsolunda "Content Security Policy" hatası olmamalı)
 ```
 
+`vercel.json`'daki CSP'yi değiştirirseniz ya da siteye başka bir alan adından dosya (yazı tipi, görsel, analiz betiği) eklerseniz, önce `npm run preview` ile deneyin. CSP izin vermeyen kaynakları sessizce engeller.
+
 Deploy'dan sonra:
+- `curl -sI https://lumie-mum-atolyesi.vercel.app/` ile güvenlik başlıkları görünmeli.
 - Yayında kutucuk işaretlenmeden form gönderilemediği denenmeli.
 - Örnek bilgilerle bir sipariş ve bir stok bildirimi gönderilip webhook tarafında `consent`, `consentVersion`, `consentedAt` alanlarının geldiği kontrol edilmeli.
 
 ## Öncelik sırasıyla yapılacaklar
 
 1. **Gerçek yayından önce:** Gizlilik metnindeki hayali bilgileri gerçekleriyle değiştirin ve metni bir hukukçuya kontrol ettirin (madde 5).
-2. Alan uzunluğu sınırlarını ekleyin (madde 3).
-3. `vercel.json` ile güvenlik başlıklarını ekleyin (madde 8).
-4. Webhook'a giden isteklere gizli bir anahtar ekleyin (madde 9).
-5. Vercel–GitHub bağlantısını kurun (madde 11).
-6. Formlara tuzak alanı (honeypot) ekleyin (madde 10).
-7. Yayında örnek bilgilerle bir gönderim yapıp Production `WEBHOOK_URL`'ini doğrulayın; Upstash bölgesini panelden kontrol edin (madde 5, 6).
+2. Webhook'a giden isteklere gizli bir anahtar ekleyin (madde 9).
+3. Vercel–GitHub bağlantısını kurun (madde 11).
+4. Formlara tuzak alanı (honeypot) ekleyin (madde 10).
+5. Yayında örnek bilgilerle bir gönderim yapıp Production `WEBHOOK_URL`'ini doğrulayın; Upstash bölgesini panelden kontrol edin (madde 5, 6).
+
+**Tamamlananlar:**
+- ✅ Alan uzunluğu sınırları (madde 3, commit `a6e8dc3`)
+- ✅ Güvenlik başlıkları (madde 8, commit `a6e8dc3` ve `f029702`)
