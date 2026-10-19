@@ -75,7 +75,8 @@ Yalnızca tükenen ürünler için, yani `isSoldOut(product)` doğruysa gösteri
 - `<input type="number">` alanının değeri **metin** olarak gelir. `quantity` alanına koymadan önce `Number(...)` ile sayıya çevrilir.
 - Ürün `id` değerleri değiştirilmez, çünkü webhook tarafında ürünler bu kimliklerle eşleştirilir.
 - Gönderim başarısız olursa (ağ hatası ya da 2xx dışında bir yanıt) kullanıcıya hata mesajı gösterilir ve girdiği bilgiler silinmez. API route alan hatası dönerse (`400` ve `{ errors }`) hata ilgili alanın altında gösterilir.
-- API route yanıtları: geçersiz istek, bilinmeyen ya da uygun olmayan ürün, doğrulama hatası → `400`; `WEBHOOK_URL` tanımsız → `500`; webhook hatası ya da zaman aşımı → `502`; başarı → `200`.
+- API route yanıtları: geçersiz istek, bilinmeyen ya da uygun olmayan ürün, doğrulama hatası → `400`; istek sınırı aşıldı → `429` (`Retry-After` başlığıyla); `WEBHOOK_URL` tanımsız → `500`; webhook hatası ya da zaman aşımı → `502`; başarı → `200`.
+- İstek sınırı: aynı IP'den dakikada en fazla 10 istek, iki route birlikte sayılır (`api/_lib/rate-limit.js`). Sınır kontrolü her şeyden önce yapılır; reddedilen istek webhook'a gitmez. Formlar `429`'da "Kısa sürede çok fazla deneme yapıldı…" mesajını gösterir ve bilgileri silmez.
 
 ## webhook.site ile test
 

@@ -74,7 +74,8 @@ export function validateStockNotification(values) {
 }
 
 // Tarayıcı yalnızca kendi API route'umuza gönderir; ürün adı gibi sabit
-// alanları sunucu ekler. Sunucu alan hatası dönerse `error.errors`'ta gelir.
+// alanları sunucu ekler. Sunucu alan hatası dönerse `error.errors`'ta gelir;
+// istek sınırı aşıldıysa `error.rateLimited` doğrudur.
 async function sendToApi(path, product, values) {
   const response = await fetch(path, {
     method: 'POST',
@@ -83,6 +84,7 @@ async function sendToApi(path, product, values) {
   })
   if (!response.ok) {
     const error = new Error(`API yanıtı: ${response.status}`)
+    error.rateLimited = response.status === 429
     error.errors = (await response.json().catch(() => ({}))).errors
     throw error
   }

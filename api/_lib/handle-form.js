@@ -2,10 +2,19 @@
 // doğrular, payload'ı hazırlar ve webhook'a iletir. Webhook adresi yalnızca
 // sunucudaki WEBHOOK_URL ortam değişkeninden okunur.
 import { products } from '../../src/data/products.js'
+import { checkRateLimit } from './rate-limit.js'
 
 const WEBHOOK_TIMEOUT_MS = 10000
 
 export async function handleForm(request, { fields, acceptsProduct, validate, buildPayload }) {
+  const retryAfter = await checkRateLimit(request)
+  if (retryAfter !== null) {
+    return Response.json(
+      { error: 'Çok fazla istek.', retryAfter },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
+
   let body
   try {
     body = await request.json()

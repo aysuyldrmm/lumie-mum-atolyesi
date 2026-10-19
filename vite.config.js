@@ -29,9 +29,11 @@ function devApi() {
 
         const chunks = []
         for await (const chunk of req) chunks.push(chunk)
+        // Vercel'deki gibi IP başlıklarını sunucu doldurur; ziyaretçinin gönderdiği değer geçmez.
+        const ip = req.socket.remoteAddress ?? 'bilinmiyor'
         const request = new Request(`http://${req.headers.host}${req.url}`, {
           method: req.method,
-          headers: req.headers,
+          headers: { ...req.headers, 'x-real-ip': ip, 'x-forwarded-for': ip },
           body: chunks.length > 0 ? Buffer.concat(chunks) : undefined,
         })
 
@@ -52,9 +54,18 @@ function devApi() {
 }
 
 export default defineConfig(({ mode }) => {
-  // WEBHOOK_URL'in VITE_ öneki yok: Vite onu tarayıcı koduna koymaz, yalnızca
+  // Bu değişkenlerin VITE_ öneki yok: Vite onları tarayıcı koduna koymaz, yalnızca
   // geliştirme sunucusundaki API route'ları okur. Terminalden verilen değer önceliklidir.
-  process.env.WEBHOOK_URL ??= loadEnv(mode, process.cwd(), '').WEBHOOK_URL
+  const env = loadEnv(mode, process.cwd(), '')
+  for (const name of [
+    'WEBHOOK_URL',
+    'KV_REST_API_URL',
+    'KV_REST_API_TOKEN',
+    'UPSTASH_REDIS_REST_URL',
+    'UPSTASH_REDIS_REST_TOKEN',
+  ]) {
+    if (env[name] !== undefined) process.env[name] ??= env[name]
+  }
 
   return {
     plugins: [react(), devApi()],

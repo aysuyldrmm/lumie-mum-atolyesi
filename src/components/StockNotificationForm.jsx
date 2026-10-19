@@ -25,7 +25,7 @@ export default function StockNotificationForm({ product, onDone }) {
         setErrors(error.errors)
         setStatus('idle')
       } else {
-        setStatus('error')
+        setStatus(error.rateLimited ? 'rate-limited' : 'error')
       }
     }
   }
@@ -68,6 +68,11 @@ export default function StockNotificationForm({ product, onDone }) {
       {status === 'error' && (
         <p className="form-hatasi">
           Talebiniz gönderilemedi. Lütfen biraz sonra tekrar deneyin.
+        </p>
+      )}
+      {status === 'rate-limited' && (
+        <p className="form-hatasi">
+          Kısa sürede çok fazla deneme yapıldı. Lütfen bir dakika sonra tekrar deneyin.
         </p>
       )}
 

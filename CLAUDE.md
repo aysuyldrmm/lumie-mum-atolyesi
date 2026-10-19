@@ -61,13 +61,15 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - Doğrulama ve payload hazırlama `src/data/webhook.js` içindedir; bu dosya hem tarayıcıda hem sunucuda kullanılır, bu yüzden içine `import.meta.env` ya da `process.env` yazılmaz.
 - Webhook adresi yalnızca sunucudaki `WEBHOOK_URL` ortam değişkenindedir (`VITE_` öneki **olmamalı**, yoksa tarayıcı koduna gömülür). Yerelde `.env.local`'dan, yayında Vercel panelinden okunur.
 - `npm run dev` sırasında `api/` route'larını `vite.config.js`'deki `devApi` eklentisi çalıştırır; ayrıca `vercel dev` gerekmez.
+- API route'ları aynı IP'den dakikada en fazla 10 isteği kabul eder (`api/_lib/rate-limit.js`, `429` döner). Sayaç Upstash Redis'te tutulur (`KV_REST_API_URL` / `KV_REST_API_TOKEN`); bu bilgiler yoksa, örneğin yerelde, bellekteki sayaç kullanılır. Bellekteki sayaç Vercel'de güvenilir değildir, çünkü Vercel kodu birden çok kopyada çalıştırır. Upstash yanıt vermezse istek kabul edilir ve durum loga yazılır.
 - `html-surum/index.html` eski, yalnızca HTML/CSS sürümüdür; referans olarak saklanır, düzenlenmez.
 
 ## Yayına alma (Vercel)
 
 1. vercel.com'da GitHub ile giriş yapın, **Add New → Project** ile `aysuyldrmm/lumie-mum-atolyesi` deposunu seçin. Framework "Vite" olarak kendiliğinden seçilir.
 2. **Settings → Environment Variables** bölümüne `WEBHOOK_URL` ekleyin: **Production** için gerçek webhook adresi, **Preview** için webhook.site test adresi.
-3. Deploy edin. Sonrasında her `main` push'u yayına otomatik çıkar. `WEBHOOK_URL`'i değiştirirseniz değişikliğin geçmesi için yeniden deploy edin.
+3. **Storage → Upstash (Redis)** ile ücretsiz bir veritabanı oluşturup projeye bağlayın. `KV_REST_API_URL` ve `KV_REST_API_TOKEN` değişkenlerini Vercel kendisi ekler; istek sınırı bunlarla çalışır.
+4. Deploy edin. Sonrasında her `main` push'u yayına otomatik çıkar. Ortam değişkenlerini değiştirirseniz değişikliğin geçmesi için yeniden deploy edin.
 
 ## Formlar ve webhook
 
