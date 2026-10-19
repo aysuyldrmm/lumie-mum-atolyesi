@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { sendStockNotification, validateStockNotification } from '../data/webhook.js'
+import ConsentField from './ConsentField.jsx'
 
 export default function StockNotificationForm({ product, onDone }) {
-  const [values, setValues] = useState({ name: '', email: '' })
+  const [values, setValues] = useState({ name: '', email: '', consent: false })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
 
   const handleChange = (event) => {
-    setValues({ ...values, [event.target.name]: event.target.value })
+    const { name, type, checked, value } = event.target
+    setValues({ ...values, [name]: type === 'checkbox' ? checked : value })
   }
 
   const handleSubmit = async (event) => {
@@ -64,6 +66,8 @@ export default function StockNotificationForm({ product, onDone }) {
         />
         {errors.email && <span className="alan-hatasi">{errors.email}</span>}
       </label>
+
+      <ConsentField checked={values.consent} onChange={handleChange} error={errors.consent} />
 
       {status === 'error' && (
         <p className="form-hatasi">

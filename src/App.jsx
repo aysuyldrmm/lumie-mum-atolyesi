@@ -1,5 +1,6 @@
 import CatalogQRCode from './components/CatalogQRCode.jsx'
 import ProductList from './components/ProductList.jsx'
+import { PRIVACY_POLICY_PATH } from './data/privacy.js'
 
 export default function App() {
   return (
@@ -16,7 +17,8 @@ export default function App() {
       </main>
 
       <footer>
-        &copy; 2026 Lumie Mum Atölyesi · El yapımı, sevgiyle.
+        &copy; 2026 Lumie Mum Atölyesi · El yapımı, sevgiyle. ·{' '}
+        <a href={PRIVACY_POLICY_PATH}>Gizlilik Politikası</a>
       </footer>
     </>
   )

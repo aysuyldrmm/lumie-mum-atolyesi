@@ -1,6 +1,9 @@
 // Form doğrulaması ve webhook payload'ı burada hazırlanır. Dosya hem tarayıcıda
 // (anında hata göstermek için) hem api/ altındaki sunucu kodunda kullanılır.
-// event, source, productId ve productName formlardan değil buradan gelir.
+// event, source, productId, productName ve onay kaydının sürümü ile saati
+// formlardan değil buradan gelir.
+import { PRIVACY_POLICY_VERSION } from './privacy.js'
+
 const SOURCE = 'lumie-web'
 
 // @ işaretinin iki yanındaki parçalar noktayla başlayıp bitemez, art arda
@@ -17,7 +20,15 @@ const cleanEmail = (email) => email.trim().replace(/İ/g, 'i').toLowerCase()
 // Telefon metin olarak kalır; sayıya çevrilirse baştaki 0 ya da + kaybolur.
 const cleanPhone = (phone) => phone.replace(/\s/g, '')
 
-export function buildOrderPayload(product, { name, phone, email, quantity }) {
+// KVKK açık rızasının kaydı: hangi politika sürümüne, ne zaman onay verildi.
+// `now` sunucu saatidir; tarayıcıdan gelen saat kullanılmaz.
+const consentRecord = (now) => ({
+  consent: true,
+  consentVersion: PRIVACY_POLICY_VERSION,
+  consentedAt: now.toISOString(),
+})
+
+export function buildOrderPayload(product, { name, phone, email, quantity }, now = new Date()) {
   return {
     event: 'order_created',
     name: cleanName(name),
@@ -26,24 +37,30 @@ export function buildOrderPayload(product, { name, phone, email, quantity }) {
     phone: cleanPhone(phone),
     email: cleanEmail(email),
     quantity: Number(quantity),
+    ...consentRecord(now),
     source: SOURCE,
   }
 }
 
-export function buildStockNotificationPayload(product, { name, email }) {
+export function buildStockNotificationPayload(product, { name, email }, now = new Date()) {
   return {
     event: 'stock_notification_requested',
     name: cleanName(name),
     productId: product.id,
     productName: product.name,
     email: cleanEmail(email),
+    ...consentRecord(now),
     source: SOURCE,
   }
 }
 
-function validateNameAndEmail({ name, email }) {
+// İki formun ortak alanları: ad, e-posta ve açık rıza kutucuğu.
+function validateCommonFields({ name, email, consent }) {
   const errors = {}
   if (!cleanName(name)) errors.name = 'Lütfen adınızı yazın.'
+  if (consent !== true) {
+    errors.consent = 'Devam etmek için onay kutucuğunu işaretlemeniz gerekiyor.'
+  }
   const cleanedEmail = cleanEmail(email)
   const turkishLetters = [...new Set(cleanedEmail)].filter((letter) => letter in TURKISH_LETTERS)
   if (turkishLetters.length > 0) {
@@ -58,7 +75,7 @@ function validateNameAndEmail({ name, email }) {
 }
 
 export function validateOrder(product, values) {
-  const errors = validateNameAndEmail(values)
+  const errors = validateCommonFields(values)
   if (!PHONE_PATTERN.test(cleanPhone(values.phone))) {
     errors.phone = 'Lütfen telefon numaranızı yalnızca rakamlarla yazın.'
   }
@@ -70,7 +87,7 @@ export function validateOrder(product, values) {
 }
 
 export function validateStockNotification(values) {
-  return validateNameAndEmail(values)
+  return validateCommonFields(values)
 }
 
 // Tarayıcı yalnızca kendi API route'umuza gönderir; ürün adı gibi sabit

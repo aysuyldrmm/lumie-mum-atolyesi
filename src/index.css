@@ -404,6 +404,41 @@ main h2 {
   font-size: 0.85rem;
 }
 
+/* KVKK aydınlatma satırı ve açık rıza kutucuğu. */
+.form-onay-alani {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.form-aydinlatma {
+  color: var(--kahve-acik);
+}
+
+.form-onay {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.form-onay input {
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  accent-color: var(--bal-koyu);
+  cursor: pointer;
+}
+
+.form-onay-alani a,
+footer a,
+.gizlilik a {
+  color: var(--bal-koyu);
+}
+
 .dugme--dolu {
   background-color: var(--bal-koyu);
   color: var(--krem);
@@ -432,4 +467,44 @@ footer {
   color: var(--kahve-acik);
   border-top: 1px solid #e8d6b8;
   background-color: var(--krem-koyu);
+}
+
+/* Gizlilik politikası sayfası: uzun metin için dar bir sütun. */
+.gizlilik {
+  max-width: 70ch;
+  margin: 0 auto;
+  overflow-wrap: anywhere;
+}
+
+.gizlilik h2 {
+  text-align: left;
+  font-size: 1.25rem;
+  margin: 2.25rem 0 0.75rem;
+}
+
+.gizlilik h2:first-of-type {
+  margin-top: 1.5rem;
+}
+
+.gizlilik p,
+.gizlilik li {
+  margin-bottom: 0.6rem;
+}
+
+.gizlilik ul {
+  padding-left: 1.25rem;
+}
+
+.gizlilik-tarih,
+.ana-sayfa-baglantisi {
+  color: var(--kahve-acik);
+  font-size: 0.9rem;
+}
+
+/* İşletmenin doldurması gereken yerler göze çarpsın. */
+.yer-tutucu {
+  padding: 0 0.25rem;
+  background-color: var(--krem-koyu);
+  color: var(--bal-koyu);
+  border-radius: 4px;
 }

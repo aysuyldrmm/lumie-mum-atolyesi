@@ -30,8 +30,10 @@ export async function handleForm(request, { fields, acceptsProduct, validate, bu
     return Response.json({ error: 'Ürün bulunamadı ya da bu işlem için uygun değil.' }, { status: 400 })
   }
 
-  // Yalnızca formun alanları alınır; tarayıcıdan gelen productName, event vb. yok sayılır.
+  // Yalnızca formun alanları alınır; tarayıcıdan gelen productName, event,
+  // consentVersion, consentedAt vb. yok sayılır. Onay yalnızca gerçek `true` ise geçerlidir.
   const values = Object.fromEntries(fields.map((field) => [field, String(body[field] ?? '')]))
+  values.consent = body.consent === true
   const errors = validate(product, values)
   if (Object.keys(errors).length > 0) {
     return Response.json({ errors }, { status: 400 })

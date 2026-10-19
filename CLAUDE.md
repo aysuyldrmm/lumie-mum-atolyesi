@@ -63,6 +63,7 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - `npm run dev` sırasında `api/` route'larını `vite.config.js`'deki `devApi` eklentisi çalıştırır; ayrıca `vercel dev` gerekmez.
 - API route'ları aynı IP'den dakikada en fazla 10 isteği kabul eder (`api/_lib/rate-limit.js`, `429` döner). Sayaç Upstash Redis'te tutulur (`KV_REST_API_URL` / `KV_REST_API_TOKEN`); bu bilgiler yoksa, örneğin yerelde, bellekteki sayaç kullanılır. Bellekteki sayaç Vercel'de güvenilir değildir, çünkü Vercel kodu birden çok kopyada çalıştırır. Upstash yanıt vermezse istek kabul edilir ve durum loga yazılır.
 - `html-surum/index.html` eski, yalnızca HTML/CSS sürümüdür; referans olarak saklanır, düzenlenmez.
+- Site iki sayfadan oluşur: `index.html` (mağaza) ve `gizlilik.html` (gizlilik politikası). İkisi de `vite.config.js`'deki `build.rollupOptions.input`'ta tanımlıdır; yeni bir sayfa eklenirse oraya da eklenmelidir.
 
 ## Yayına alma (Vercel)
 
@@ -75,10 +76,18 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 
 Karttaki düğme stoka göre değişir ve ilgili formu açılır pencerede açar. Formlar webhook'a şu alanları gönderir:
 
-- **Sipariş Ver** (stokta olan ürünler): event, name, productId, productName, phone, email, quantity, source
-- **Stok Bildirimi İste** (tükenen ürünler): event, name, productId, productName, email, source
+- **Sipariş Ver** (stokta olan ürünler): event, name, productId, productName, phone, email, quantity, consent, consentVersion, consentedAt, source
+- **Stok Bildirimi İste** (tükenen ürünler): event, name, productId, productName, email, consent, consentVersion, consentedAt, source
 
 `productId` ve `productName` ürün verisinden (`id`, `name`) alınır; formlar bunları kullanıcıdan istemez.
+
+## KVKK ve gizlilik
+
+- İki formda da `ConsentField` bileşeni vardır: üstte kutucuksuz bir aydınlatma satırı, altında varsayılan olarak boş bir açık rıza kutucuğu. Kutucuk yalnızca **yurt dışına aktarım** içindir; aydınlatma ile açık rıza aynı kutucukta birleştirilmez.
+- Kutucuk işaretlenmeden form gönderilemez; sunucu da `consent === true` olmayan isteği `400` ile reddeder.
+- Gizlilik politikası ayrı bir sayfadır: `gizlilik.html` → `src/privacy.jsx` → `src/components/PrivacyPolicy.jsx`. Metin bir **taslaktır**; köşeli parantezli yerler işletme bilgileriyle doldurulmalı ve yayından önce bir hukukçuya kontrol ettirilmelidir.
+- Politika metni değiştiğinde `src/data/privacy.js`'deki `PRIVACY_POLICY_VERSION` güncellenir. Bu tarih sayfada "Son güncelleme" olarak görünür ve her onayla birlikte webhook'a `consentVersion` olarak gider.
+- Yeni bir veri, hizmet sağlayıcı (ör. analiz aracı, çerez) ya da saklama yeri eklenirse gizlilik politikası da güncellenmelidir.
 
 ## Renk paleti
 

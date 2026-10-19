@@ -12,7 +12,8 @@ description: Lumie sitesindeki formlardan (Sipariş Ver, Stok Bildirimi İste) w
 - Webhook'a giden istek `POST` ile gönderilir, gövde JSON olur: `Content-Type: application/json`.
 - Webhook adresi yalnızca sunucuda `process.env.WEBHOOK_URL`'den okunur. `VITE_` önekli bir değişken ya da `import.meta.env` kullanılmaz, çünkü bunlar tarayıcı koduna gömülür.
 - Payload'da **yalnızca** aşağıda listelenen alanlar bulunur. Fazla alan (fiyat, kategori, zaman damgası vb.) ya da eksik alan olmaz.
-- `event`, `source`, `productId` ve `productName` sunucuda, payload'ı oluşturan ortak fonksiyonlar tarafından doldurulur. Tarayıcıdan bu adlarla bir değer gelse bile yok sayılır.
+- `event`, `source`, `productId`, `productName`, `consentVersion` ve `consentedAt` sunucuda, payload'ı oluşturan ortak fonksiyonlar tarafından doldurulur. Tarayıcıdan bu adlarla bir değer gelse bile yok sayılır.
+- KVKK: Tarayıcı açık rıza kutucuğunun değerini `consent` olarak gönderir. Sunucu yalnızca gerçek `true` değerini kabul eder (`"true"` metni ya da `1` reddedilir); onay yoksa `400` ve `errors.consent` döner.
 
 ## Sipariş Ver
 
@@ -27,6 +28,9 @@ Yalnızca stokta olan ürünler için, yani `isSoldOut(product)` yanlışsa gös
 | `phone` | string | Boşluklar silinir; **sayıya çevrilmez**, çünkü baştaki `0` ya da `+` kaybolur |
 | `email` | string | Baştaki ve sondaki boşluklar silinir, küçük harfe çevrilir, geçerli e-posta biçiminde olmalı |
 | `quantity` | number (tam sayı) | **Metin değil, sayı:** `2`, `"2"` değil. En az `1`, en fazla `product.stock` |
+| `consent` | boolean | Her zaman `true`. Açık rıza kutucuğu işaretlenmeden istek kabul edilmez |
+| `consentVersion` | string | `src/data/privacy.js`'deki `PRIVACY_POLICY_VERSION`, örn. `"2026-10-19"` |
+| `consentedAt` | string | Onayın sunucu saati, ISO 8601 (UTC). Tarayıcıdan gelen saat kullanılmaz |
 | `source` | string | Sabit: `"lumie-web"` |
 
 Örnek:
@@ -40,6 +44,9 @@ Yalnızca stokta olan ürünler için, yani `isSoldOut(product)` yanlışsa gös
   "phone": "05321234567",
   "email": "ayse@example.com",
   "quantity": 2,
+  "consent": true,
+  "consentVersion": "2026-10-19",
+  "consentedAt": "2026-10-19T09:32:25.429Z",
   "source": "lumie-web"
 }
 ```
@@ -55,6 +62,9 @@ Yalnızca tükenen ürünler için, yani `isSoldOut(product)` doğruysa gösteri
 | `productId` | string | `product.id` |
 | `productName` | string | `product.name` |
 | `email` | string | Baştaki ve sondaki boşluklar silinir, küçük harfe çevrilir, geçerli e-posta biçiminde olmalı |
+| `consent` | boolean | Her zaman `true`. Açık rıza kutucuğu işaretlenmeden istek kabul edilmez |
+| `consentVersion` | string | `src/data/privacy.js`'deki `PRIVACY_POLICY_VERSION` |
+| `consentedAt` | string | Onayın sunucu saati, ISO 8601 (UTC) |
 | `source` | string | Sabit: `"lumie-web"` |
 
 Örnek:
@@ -66,6 +76,9 @@ Yalnızca tükenen ürünler için, yani `isSoldOut(product)` doğruysa gösteri
   "productId": "amber-aksami",
   "productName": "Amber Akşamı",
   "email": "ayse@example.com",
+  "consent": true,
+  "consentVersion": "2026-10-19",
+  "consentedAt": "2026-10-19T09:32:25.946Z",
   "source": "lumie-web"
 }
 ```

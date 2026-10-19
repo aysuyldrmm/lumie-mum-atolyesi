@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -69,5 +70,14 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), devApi()],
+    build: {
+      // İki sayfa: mağaza ve gizlilik politikası.
+      rollupOptions: {
+        input: {
+          main: fileURLToPath(new URL('./index.html', import.meta.url)),
+          gizlilik: fileURLToPath(new URL('./gizlilik.html', import.meta.url)),
+        },
+      },
+    },
   }
 })

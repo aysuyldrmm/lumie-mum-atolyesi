@@ -1,13 +1,21 @@
 import { useState } from 'react'
 import { sendOrder, validateOrder } from '../data/webhook.js'
+import ConsentField from './ConsentField.jsx'
 
 export default function OrderForm({ product, onDone }) {
-  const [values, setValues] = useState({ name: '', phone: '', email: '', quantity: '1' })
+  const [values, setValues] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    quantity: '1',
+    consent: false,
+  })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
 
   const handleChange = (event) => {
-    setValues({ ...values, [event.target.name]: event.target.value })
+    const { name, type, checked, value } = event.target
+    setValues({ ...values, [name]: type === 'checkbox' ? checked : value })
   }
 
   const handleSubmit = async (event) => {
@@ -90,6 +98,8 @@ export default function OrderForm({ product, onDone }) {
         />
         {errors.quantity && <span className="alan-hatasi">{errors.quantity}</span>}
       </label>
+
+      <ConsentField checked={values.consent} onChange={handleChange} error={errors.consent} />
 
       {status === 'error' && (
         <p className="form-hatasi">
