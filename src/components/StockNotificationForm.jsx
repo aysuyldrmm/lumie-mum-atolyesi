@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { sendStockNotification, validateStockNotification } from '../data/webhook.js'
+import {
+  FIELD_LIMITS,
+  sendStockNotification,
+  validateStockNotification,
+} from '../data/webhook.js'
 import ConsentField from './ConsentField.jsx'
 
 export default function StockNotificationForm({ product, onDone }) {
@@ -51,7 +55,13 @@ export default function StockNotificationForm({ product, onDone }) {
 
       <label className="form-alan">
         Adınız
-        <input name="name" value={values.name} onChange={handleChange} autoComplete="name" />
+        <input
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          autoComplete="name"
+          maxLength={FIELD_LIMITS.name}
+        />
         {errors.name && <span className="alan-hatasi">{errors.name}</span>}
       </label>
 
@@ -63,6 +73,7 @@ export default function StockNotificationForm({ product, onDone }) {
           value={values.email}
           onChange={handleChange}
           autoComplete="email"
+          maxLength={FIELD_LIMITS.email}
         />
         {errors.email && <span className="alan-hatasi">{errors.email}</span>}
       </label>

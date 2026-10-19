@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { sendOrder, validateOrder } from '../data/webhook.js'
+import { FIELD_LIMITS, sendOrder, validateOrder } from '../data/webhook.js'
 import ConsentField from './ConsentField.jsx'
 
 export default function OrderForm({ product, onDone }) {
@@ -58,7 +58,13 @@ export default function OrderForm({ product, onDone }) {
 
       <label className="form-alan">
         Adınız
-        <input name="name" value={values.name} onChange={handleChange} autoComplete="name" />
+        <input
+          name="name"
+          value={values.name}
+          onChange={handleChange}
+          autoComplete="name"
+          maxLength={FIELD_LIMITS.name}
+        />
         {errors.name && <span className="alan-hatasi">{errors.name}</span>}
       </label>
 
@@ -70,6 +76,7 @@ export default function OrderForm({ product, onDone }) {
           value={values.phone}
           onChange={handleChange}
           autoComplete="tel"
+          maxLength={FIELD_LIMITS.phone}
         />
         {errors.phone && <span className="alan-hatasi">{errors.phone}</span>}
       </label>
@@ -82,6 +89,7 @@ export default function OrderForm({ product, onDone }) {
           value={values.email}
           onChange={handleChange}
           autoComplete="email"
+          maxLength={FIELD_LIMITS.email}
         />
         {errors.email && <span className="alan-hatasi">{errors.email}</span>}
       </label>

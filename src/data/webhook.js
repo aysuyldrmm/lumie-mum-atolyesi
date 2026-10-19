@@ -11,6 +11,11 @@ const SOURCE = 'lumie-web'
 const EMAIL_PATTERN = /^[^\s@.]+(\.[^\s@.]+)*@[^\s@.]+(\.[^\s@.]+)+$/
 const PHONE_PATTERN = /^\+?\d+$/
 
+// En fazla karakter sayıları (boşluklar temizlendikten sonra). Formlardaki
+// `maxLength` da bu değerleri kullanır; sunucu ayrıca kontrol eder.
+// E-posta için 254, standardın izin verdiği en uzun adrestir.
+export const FIELD_LIMITS = { name: 100, email: 254, phone: 20 }
+
 // E-posta adreslerinde Türkçe harf yerine yazılması gereken harfler.
 const TURKISH_LETTERS = { ş: 's', ğ: 'g', ü: 'u', ö: 'o', ç: 'c', ı: 'i' }
 
@@ -57,13 +62,24 @@ export function buildStockNotificationPayload(product, { name, email }, now = ne
 // İki formun ortak alanları: ad, e-posta ve açık rıza kutucuğu.
 function validateCommonFields({ name, email, consent }) {
   const errors = {}
-  if (!cleanName(name)) errors.name = 'Lütfen adınızı yazın.'
+  const cleanedName = cleanName(name)
+  if (!cleanedName) {
+    errors.name = 'Lütfen adınızı yazın.'
+  } else if (cleanedName.length > FIELD_LIMITS.name) {
+    errors.name = `Adınız en fazla ${FIELD_LIMITS.name} karakter olabilir.`
+  }
   if (consent !== true) {
     errors.consent = 'Devam etmek için onay kutucuğunu işaretlemeniz gerekiyor.'
   }
   const cleanedEmail = cleanEmail(email)
-  const turkishLetters = [...new Set(cleanedEmail)].filter((letter) => letter in TURKISH_LETTERS)
-  if (turkishLetters.length > 0) {
+  // Uzunluk diğer e-posta kontrollerinden önce bakılır; çok uzun metin işlenmez.
+  const turkishLetters =
+    cleanedEmail.length > FIELD_LIMITS.email
+      ? []
+      : [...new Set(cleanedEmail)].filter((letter) => letter in TURKISH_LETTERS)
+  if (cleanedEmail.length > FIELD_LIMITS.email) {
+    errors.email = `E-posta adresi en fazla ${FIELD_LIMITS.email} karakter olabilir.`
+  } else if (turkishLetters.length > 0) {
     const fixes = turkishLetters
       .map((letter) => `"${letter}" yerine "${TURKISH_LETTERS[letter]}"`)
       .join(', ')
@@ -76,7 +92,10 @@ function validateCommonFields({ name, email, consent }) {
 
 export function validateOrder(product, values) {
   const errors = validateCommonFields(values)
-  if (!PHONE_PATTERN.test(cleanPhone(values.phone))) {
+  const cleanedPhone = cleanPhone(values.phone)
+  if (cleanedPhone.length > FIELD_LIMITS.phone) {
+    errors.phone = `Telefon numarası en fazla ${FIELD_LIMITS.phone} karakter olabilir.`
+  } else if (!PHONE_PATTERN.test(cleanedPhone)) {
     errors.phone = 'Lütfen telefon numaranızı yalnızca rakamlarla yazın.'
   }
   const quantity = Number(values.quantity)
