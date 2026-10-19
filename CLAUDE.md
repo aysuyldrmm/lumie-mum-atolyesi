@@ -46,6 +46,34 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 2. `Ctrl + C` tuşlarına basın. Onay sorulursa `Y` yazıp Enter'a basın.
 3. Tarayıcı sekmesini kapatabilirsiniz; sunucu kapandıktan sonra sayfa yenilenirse açılmaz, bu normaldir.
 
+## Telefon uygulamasını açma (Expo Go)
+
+Telefon uygulaması `mobile/` klasöründedir ve Expo SDK 58 kullanır. Telefonda mağazadaki **Expo Go** uygulaması gerekir; Expo Go yalnızca en güncel SDK'yı destekler.
+
+**İlk kez:**
+
+1. Terminalde uygulama klasörüne geçin: `cd C:\Users\YOGA\lumie\mobile`
+2. Bağımlılıkları kurun: `npm install`
+
+**Telefon ve bilgisayar aynı Wi-Fi'daysa:**
+
+1. `npm run start`
+2. Terminalde çıkan karekodu telefonun kamerasıyla (iPhone) ya da Expo Go'nun içinden (Android) okutun.
+
+**Aynı ağda değilseniz (tünel):**
+
+1. Bir kez Expo hesabıyla giriş yapın (ücretsiz): `npx expo login`
+2. `npm run start:tunnel`. Uygulama kodu internet üzerinden telefona gelir; telefon mobil veride olsa da çalışır.
+3. Tünel açılmazsa: bilgisayarı telefonun kişisel erişim noktasına (hotspot) bağlayın, ikisi aynı ağda olur ve `npm run start` yeter.
+
+**Kapatmak için:** Terminalde `Ctrl + C`.
+
+**Bilmeniz gerekenler:**
+- **API adresi:** Uygulama formları **canlı sitenin** API'sine (`https://lumie-mum-atolyesi.vercel.app`) gönderir. Uygulamadan yapılan geçerli bir gönderim gerçek webhook'a düşer; testte örnek bilgiler kullanın. Başka bir adres için uygulamayı `EXPO_PUBLIC_API_URL` ortam değişkeniyle başlatın.
+- **İnternet:** Ürün fotoğrafları da canlı siteden yüklenir; internet yoksa alev simgesi görünür.
+- **Paket kurma:** Uygulamaya paket eklerken `npm install` yerine `npx expo install <paket>` kullanın; SDK'ya uygun sürümü seçer. Expo Go yalnızca kendi içindeki yerel modülleri çalıştırır; yerel kod içeren bir paket eklenirse uygulama Expo Go'da açılmaz.
+- **Uyumu kontrol:** `npx expo-doctor` ve `npx expo install --check`.
+
 ## Mimari ve React geçişi
 
 - Proje Vite + React ile çalışır. Geliştirme sunucusu: `npm run dev`.
@@ -66,6 +94,12 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 - Form alanlarının en fazla uzunlukları `src/data/webhook.js`'deki `FIELD_LIMITS`'tedir (ad 100, e-posta 254, telefon 20). Sunucu bu sınırları kontrol eder; formlardaki `maxLength` da aynı sabiti kullanır, sayı bileşene yazılmaz.
 - Güvenlik başlıkları (CSP, X-Frame-Options vb.) `vercel.json`'dadır. Vercel bunları fonksiyon yanıtlarına eklemediği için API yanıtlarının başlıkları `api/_lib/handle-form.js`'te ayrıca eklenir. `npm run preview` aynı başlıklarla çalışır: CSP'yi değiştirdikten ya da başka bir alan adından kaynak (yazı tipi, görsel, betik) ekledikten sonra önce orada deneyin. `npm run dev`'e başlık uygulanmaz.
 - Deploy öncesi kontroller ve bilinen eksikler `docs/guvenlik-kontrol-listesi.md`'dedir.
+- **Telefon uygulaması (`mobile/`):** Expo + React Native, tek ekran.
+  - **Paylaşılan veri:** Ürünler, kategoriler, doğrulama, `FIELD_LIMITS` ve politika sürümü **kopyalanmaz**, kökteki `src/data/` dosyalarından okunur (`mobile/metro.config.js`'deki `watchFolders`). Bu yüzden `src/data/` altındaki dosyalara tarayıcıya ya da Node'a özgü kod (`window`, `document`, `import.meta.env`, `process.env`) yazılmaz; üç ortamda da (web, telefon, sunucu) çalışmalıdırlar.
+  - **Bileşenler:** `mobile/src/components/` altında, adları webdekilerle aynı. Stiller `StyleSheet` ile yazılır, CSS sınıfı yoktur.
+  - **Renkler:** Palet `mobile/src/theme.js`'de **ikinci kez** yazılıdır (React Native CSS değişkeni okuyamaz). `src/index.css`'teki bir renk değişirse `theme.js` de güncellenmelidir.
+  - **API:** Uygulama `sendOrder` / `sendStockNotification`'ı `{ baseUrl, source: 'lumie-mobile' }` ile çağırır. Webhook adresi ve diğer gizli bilgiler uygulamaya hiç girmez.
+  - **Yayından ayrı:** `mobile/` web sitesinin parçası değildir. `.vercelignore` sayesinde `vercel deploy` bu klasörü yüklemez; Vite de yalnızca `index.html` ve `gizlilik.html`'i derler.
 - Site iki sayfadan oluşur: `index.html` (mağaza) ve `gizlilik.html` (gizlilik politikası). İkisi de `vite.config.js`'deki `build.rollupOptions.input`'ta tanımlıdır; yeni bir sayfa eklenirse oraya da eklenmelidir.
 
 ## Yayına alma (Vercel)
@@ -82,7 +116,7 @@ Karttaki düğme stoka göre değişir ve ilgili formu açılır pencerede açar
 - **Sipariş Ver** (stokta olan ürünler): event, name, productId, productName, phone, email, quantity, consent, consentVersion, consentedAt, source
 - **Stok Bildirimi İste** (tükenen ürünler): event, name, productId, productName, email, consent, consentVersion, consentedAt, source
 
-`productId` ve `productName` ürün verisinden (`id`, `name`) alınır; formlar bunları kullanıcıdan istemez.
+`productId` ve `productName` ürün verisinden (`id`, `name`) alınır; formlar bunları kullanıcıdan istemez. `source` web sitesinden gelen kayıtlarda `"lumie-web"`, telefon uygulamasından gelenlerde `"lumie-mobile"`'dır.
 
 ## KVKK ve gizlilik
 

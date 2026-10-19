@@ -2,6 +2,7 @@
 // doğrular, payload'ı hazırlar ve webhook'a iletir. Webhook adresi yalnızca
 // sunucudaki WEBHOOK_URL ortam değişkeninden okunur.
 import { products } from '../../src/data/products.js'
+import { DEFAULT_SOURCE, SOURCES } from '../../src/data/webhook.js'
 import { checkRateLimit } from './rate-limit.js'
 
 const WEBHOOK_TIMEOUT_MS = 10000
@@ -42,6 +43,12 @@ async function processForm(request, { fields, acceptsProduct, validate, buildPay
     return Response.json({ error: 'Geçersiz istek.' }, { status: 400 })
   }
 
+  // Kaynak yalnızca izin verilen değerlerden biri olabilir; gelmezse web sitesidir.
+  const source = body.source ?? DEFAULT_SOURCE
+  if (!SOURCES.includes(source)) {
+    return Response.json({ error: 'Geçersiz istek.' }, { status: 400 })
+  }
+
   const product = products.find((item) => item.id === body.productId)
   if (!product || !acceptsProduct(product)) {
     return Response.json({ error: 'Ürün bulunamadı ya da bu işlem için uygun değil.' }, { status: 400 })
@@ -66,7 +73,7 @@ async function processForm(request, { fields, acceptsProduct, validate, buildPay
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildPayload(product, values)),
+      body: JSON.stringify(buildPayload(product, values, { source })),
       signal: AbortSignal.timeout(WEBHOOK_TIMEOUT_MS),
     })
     if (!response.ok) throw new Error(`Webhook yanıtı: ${response.status}`)

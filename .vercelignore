@@ -1,0 +1,11 @@
+# `vercel deploy` sırasında yüklenmeyecek dosyalar.
+# Telefon uygulaması web sitesinin parçası değildir; yayına gitmez.
+mobile
+# .gitignore'daki kurallar burada da tekrarlanır, çünkü .vercelignore
+# varken Vercel CLI .gitignore'a bakmayabilir.
+node_modules
+dist
+.env*
+!.env.example
+.vercel
+desktop.ini

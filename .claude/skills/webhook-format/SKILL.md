@@ -7,12 +7,13 @@ description: Lumie sitesindeki formlardan (Sipariş Ver, Stok Bildirimi İste) w
 
 ## Genel
 
-- Akış: tarayıcı → sitenin API route'u (`/api/order`, `/api/stock-notification`) → webhook. Tarayıcı webhook'a **asla** doğrudan gitmez.
+- Akış: web sitesi ya da telefon uygulaması (`mobile/`) → sitenin API route'u (`/api/order`, `/api/stock-notification`) → webhook. İstemciler webhook'a **asla** doğrudan gitmez.
 - Tarayıcı API route'una yalnızca `productId` ve formun alanlarını gönderir. Sunucu ürünü `products.js`'ten bulur, doğrulamayı (`validateOrder` / `validateStockNotification`) yeniden yapar ve payload'ı kendisi hazırlar.
 - Webhook'a giden istek `POST` ile gönderilir, gövde JSON olur: `Content-Type: application/json`.
 - Webhook adresi yalnızca sunucuda `process.env.WEBHOOK_URL`'den okunur. `VITE_` önekli bir değişken ya da `import.meta.env` kullanılmaz, çünkü bunlar tarayıcı koduna gömülür.
 - Payload'da **yalnızca** aşağıda listelenen alanlar bulunur. Fazla alan (fiyat, kategori, zaman damgası vb.) ya da eksik alan olmaz.
-- `event`, `source`, `productId`, `productName`, `consentVersion` ve `consentedAt` sunucuda, payload'ı oluşturan ortak fonksiyonlar tarafından doldurulur. Tarayıcıdan bu adlarla bir değer gelse bile yok sayılır.
+- `event`, `productId`, `productName`, `consentVersion` ve `consentedAt` sunucuda, payload'ı oluşturan ortak fonksiyonlar tarafından doldurulur. İstemciden bu adlarla bir değer gelse bile yok sayılır.
+- `source` istemcinin bildirdiği kaynaktır ve yalnızca `src/data/webhook.js`'deki `SOURCES` listesindeki değerlerden biri olabilir: `"lumie-web"` (web sitesi) ya da `"lumie-mobile"` (telefon uygulaması). İstemci bildirmezse `"lumie-web"` sayılır; web sitesi bu yüzden göndermez. Listede olmayan bir değer `400` alır. Yeni bir kaynak eklemek bu listeye eklemekle olur.
 - KVKK: Tarayıcı açık rıza kutucuğunun değerini `consent` olarak gönderir. Sunucu yalnızca gerçek `true` değerini kabul eder (`"true"` metni ya da `1` reddedilir); onay yoksa `400` ve `errors.consent` döner.
 
 ## Sipariş Ver
@@ -31,7 +32,7 @@ Yalnızca stokta olan ürünler için, yani `isSoldOut(product)` yanlışsa gös
 | `consent` | boolean | Her zaman `true`. Açık rıza kutucuğu işaretlenmeden istek kabul edilmez |
 | `consentVersion` | string | `src/data/privacy.js`'deki `PRIVACY_POLICY_VERSION`, örn. `"2026-10-19"` |
 | `consentedAt` | string | Onayın sunucu saati, ISO 8601 (UTC). Tarayıcıdan gelen saat kullanılmaz |
-| `source` | string | Sabit: `"lumie-web"` |
+| `source` | string | `"lumie-web"` (web sitesi) ya da `"lumie-mobile"` (telefon uygulaması) |
 
 Örnek:
 
@@ -65,7 +66,7 @@ Yalnızca tükenen ürünler için, yani `isSoldOut(product)` doğruysa gösteri
 | `consent` | boolean | Her zaman `true`. Açık rıza kutucuğu işaretlenmeden istek kabul edilmez |
 | `consentVersion` | string | `src/data/privacy.js`'deki `PRIVACY_POLICY_VERSION` |
 | `consentedAt` | string | Onayın sunucu saati, ISO 8601 (UTC) |
-| `source` | string | Sabit: `"lumie-web"` |
+| `source` | string | `"lumie-web"` (web sitesi) ya da `"lumie-mobile"` (telefon uygulaması) |
 
 Örnek:
 

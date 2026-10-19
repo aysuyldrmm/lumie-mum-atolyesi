@@ -1,10 +1,14 @@
-// Form doğrulaması ve webhook payload'ı burada hazırlanır. Dosya hem tarayıcıda
-// (anında hata göstermek için) hem api/ altındaki sunucu kodunda kullanılır.
-// event, source, productId, productName ve onay kaydının sürümü ile saati
-// formlardan değil buradan gelir.
+// Form doğrulaması ve webhook payload'ı burada hazırlanır. Dosya web sitesinde,
+// telefon uygulamasında (mobile/) ve api/ altındaki sunucu kodunda kullanılır;
+// bu yüzden içine tarayıcıya ya da Node'a özgü bir şey yazılmaz.
+// event, productId, productName ve onay kaydının sürümü ile saati formlardan
+// değil buradan gelir.
 import { PRIVACY_POLICY_VERSION } from './privacy.js'
 
-const SOURCE = 'lumie-web'
+// Kaydın nereden geldiği. İstemci yalnızca bu değerlerden birini bildirebilir;
+// bildirmezse web sitesi sayılır.
+export const SOURCES = ['lumie-web', 'lumie-mobile']
+export const DEFAULT_SOURCE = 'lumie-web'
 
 // @ işaretinin iki yanındaki parçalar noktayla başlayıp bitemez, art arda
 // nokta içeremez; alan adında en az bir nokta olmalı.
@@ -33,7 +37,11 @@ const consentRecord = (now) => ({
   consentedAt: now.toISOString(),
 })
 
-export function buildOrderPayload(product, { name, phone, email, quantity }, now = new Date()) {
+export function buildOrderPayload(
+  product,
+  { name, phone, email, quantity },
+  { now = new Date(), source = DEFAULT_SOURCE } = {},
+) {
   return {
     event: 'order_created',
     name: cleanName(name),
@@ -43,11 +51,15 @@ export function buildOrderPayload(product, { name, phone, email, quantity }, now
     email: cleanEmail(email),
     quantity: Number(quantity),
     ...consentRecord(now),
-    source: SOURCE,
+    source,
   }
 }
 
-export function buildStockNotificationPayload(product, { name, email }, now = new Date()) {
+export function buildStockNotificationPayload(
+  product,
+  { name, email },
+  { now = new Date(), source = DEFAULT_SOURCE } = {},
+) {
   return {
     event: 'stock_notification_requested',
     name: cleanName(name),
@@ -55,7 +67,7 @@ export function buildStockNotificationPayload(product, { name, email }, now = ne
     productName: product.name,
     email: cleanEmail(email),
     ...consentRecord(now),
-    source: SOURCE,
+    source,
   }
 }
 
@@ -109,14 +121,16 @@ export function validateStockNotification(values) {
   return validateCommonFields(values)
 }
 
-// Tarayıcı yalnızca kendi API route'umuza gönderir; ürün adı gibi sabit
+// İstemci yalnızca sitenin API route'larına gönderir; ürün adı gibi sabit
 // alanları sunucu ekler. Sunucu alan hatası dönerse `error.errors`'ta gelir;
 // istek sınırı aşıldıysa `error.rateLimited` doğrudur.
-async function sendToApi(path, product, values) {
-  const response = await fetch(path, {
+// Web sitesi seçenek vermez (aynı sitedeki /api). Telefon uygulaması sitenin
+// adresini (`baseUrl`) ve kaynağını (`source: 'lumie-mobile'`) verir.
+async function sendToApi(path, product, values, { baseUrl = '', source } = {}) {
+  const response = await fetch(`${baseUrl}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId: product.id, ...values }),
+    body: JSON.stringify({ productId: product.id, ...values, ...(source && { source }) }),
   })
   if (!response.ok) {
     const error = new Error(`API yanıtı: ${response.status}`)
@@ -126,7 +140,8 @@ async function sendToApi(path, product, values) {
   }
 }
 
-export const sendOrder = (product, values) => sendToApi('/api/order', product, values)
+export const sendOrder = (product, values, options) =>
+  sendToApi('/api/order', product, values, options)
 
-export const sendStockNotification = (product, values) =>
-  sendToApi('/api/stock-notification', product, values)
+export const sendStockNotification = (product, values, options) =>
+  sendToApi('/api/stock-notification', product, values, options)
