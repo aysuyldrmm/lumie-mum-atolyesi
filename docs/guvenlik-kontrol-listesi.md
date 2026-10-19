@@ -275,7 +275,7 @@ Tarayıcıdan gelen `productName`, `event`, `source`, `consentVersion`, `consent
 
 ## 12. Telefon uygulaması (`mobile/`) ✅ ⚠️
 
-Expo SDK 58 ile yazılmış, Expo Go'da açılan uygulama (commit `a8971eb`). Formlar canlı sitenin API'sine gider, yani madde 3–5'teki sunucu kontrolleri, rate limit ve KVKK onayı uygulama için de geçerli.
+Expo Go'da açılan uygulama. İlk sürüm SDK 58 ile yazıldı (commit `a8971eb`). iPhone'daki Expo Go yalnızca SDK 57'yi desteklediği için SDK 57'ye indirildi. İndirmeden sonra şunlar tekrarlandı: `expo-doctor` 21/21, `expo install --check` güncel, Android/iOS paket taraması ve tarayıcı testleri. Formlar canlı sitenin API'sine gider, yani madde 3–5'teki sunucu kontrolleri, rate limit ve KVKK onayı uygulama için de geçerli.
 
 **✅ Uygulamada gizli bilgi yok.**
 - **Kaynak kod:** `mobile/src/config.js`'de yalnızca sitenin herkese açık adresi var (`https://lumie-mum-atolyesi.vercel.app`, `EXPO_PUBLIC_API_URL` ile değiştirilebilir). Webhook adresi, Upstash bilgileri ve `process.env.WEBHOOK_URL` uygulama kodunda yok.
@@ -305,13 +305,16 @@ Expo SDK 58 ile yazılmış, Expo Go'da açılan uygulama (commit `a8971eb`). Fo
 - **Sınır:** Bu testler tarayıcıda yapıldı. Gerçek telefonda, Expo Go'da deneme site sahibinde.
 
 **⚠️ Expo geliştirme araçlarında bilinen açıklar.**
-- `cd mobile && npm audit` → 22 bulgu (7 orta, 15 yüksek). Üç kök neden var: `braces` (≤3.0.3, desen işlemede hizmet engelleme), `node-forge` (≤1.4.0, imza doğrulama) ve `uuid` (<11.1.1).
+- `cd mobile && npm audit` → SDK 57 ile 23 bulgu (8 orta, 15 yüksek). Üç kök neden var: `braces` (≤3.0.3, desen işlemede hizmet engelleme), `node-forge` (≤1.4.0, imza doğrulama) ve `uuid` (<11.1.1).
 - **Etki:** Hepsi Expo CLI ve yapılandırma araçlarının içinde (`@expo/cli`, `@expo/config`…), yani yalnızca geliştiricinin bilgisayarında çalışıyor. Telefondaki uygulama paketine girmiyorlar (`node-forge` aranıp bulunmadı). Kök projenin bağımlılıklarında açık yok (madde 7).
-- **Neden düzeltilmedi:** `expo` zaten en güncel sürümde (58.0.16). `npm audit fix --force` Expo'nun uyumsuz sürümlerini kurup projeyi bozar. Expo yeni bir yama yayınladığında `npx expo install --fix` ile güncellenmeli.
+- **Neden düzeltilmedi:** `expo`, Expo Go'nun desteklediği SDK 57'nin en güncel sürümünde (57.0.30). `npm audit fix --force` Expo'nun uyumsuz sürümlerini kurup projeyi bozar. Expo yeni bir yama yayınladığında `npx expo install --fix` ile güncellenmeli.
 
 **Not: farklı ağdan bağlanma.**
-- Expo SDK 58'de tünel (`npm run start:tunnel`) Expo hesabıyla giriş istiyor.
-- Giriş istemeyen ngrok tüneli (`--tunnel ngrok`) üç denemede de `TypeError: Cannot read properties of undefined (reading 'body')` hatasıyla açılmadı; bu yüzden kullanılmıyor.
+- **SDK 57'de** tünel (`npm run start:tunnel` = `expo start --tunnel`) ngrok ile açılıyor ve Expo hesabı istemiyor.
+- **Test:** "Tunnel ready." mesajı geldi ve iOS paketi tünel adresinden (`*.exp.direct`) internet üzerinden indirildi (HTTP 200). Pakette ürün verisi ve `lumie-mobile` vardı, webhook adresi yoktu.
+- **SDK 58'de durum farklıydı:** Varsayılan tünel Expo hesabı istiyordu, `--tunnel ngrok` ise bu bilgisayarda hata verdi.
+- **Anonim tünel adresi:** ngrok'un `*.exp.direct` adresi tahmin edilebilir; adresi bilen herkes geliştirme sunucusundan uygulama kodunu indirebilir. Kodda gizli bilgi olmadığı için risk düşük, ama tüneli iş bitince `Ctrl + C` ile kapatın.
+- `@expo/ngrok` (4.1.3) `mobile/` içinde geliştirme bağımlılığı. `npm audit`'teki 23. bulgu onun kullandığı `uuid`'den geliyor; kök nedenler aynı üçü.
 - Tünel, uygulama kodunu Expo'nun sunucusu üzerinden taşır. Gizli bilgi içermediği için bu bir risk değil.
 
 ## Deploy öncesi kısa kontrol (her seferinde)

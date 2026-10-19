@@ -48,7 +48,9 @@ Sıcak ve sade, krem ve bal rengi tonlarında.
 
 ## Telefon uygulamasını açma (Expo Go)
 
-Telefon uygulaması `mobile/` klasöründedir ve Expo SDK 58 kullanır. Telefonda mağazadaki **Expo Go** uygulaması gerekir; Expo Go yalnızca en güncel SDK'yı destekler.
+Telefon uygulaması `mobile/` klasöründedir ve Expo SDK 57 kullanır. Telefonda mağazadaki **Expo Go** uygulaması gerekir. Expo Go her seferinde **tek bir SDK** sürümünü destekler; desteklediği sürüm Expo Go'nun ayarlarında "Supported SDK" olarak yazar.
+
+**SDK sürümü neden 57:** npm'deki en güncel sürüm 58 olsa da iPhone'daki Expo Go (19 Ekim 2026) yalnızca SDK 57'yi destekliyordu ve "Project is incompatible with this version of Expo Go" hatası veriyordu. Expo Go mağazada 58'e güncellenince proje de yükseltilebilir: `npx expo install expo@^58.0.0` ve ardından `npx expo install --fix`. Yükseltmeden önce Expo Go'daki "Supported SDK" değerine bakın. Not: SDK 58'de `--tunnel` Expo hesabıyla giriş ister, ngrok için `--tunnel ngrok` yazılır.
 
 **İlk kez:**
 
@@ -58,13 +60,15 @@ Telefon uygulaması `mobile/` klasöründedir ve Expo SDK 58 kullanır. Telefond
 **Telefon ve bilgisayar aynı Wi-Fi'daysa:**
 
 1. `npm run start`
-2. Terminalde çıkan karekodu telefonun kamerasıyla (iPhone) ya da Expo Go'nun içinden (Android) okutun.
+2. Terminalde çıkan karekodu telefonun kamerasıyla (iPhone) ya da Expo Go'nun içinden (Android) okutun. Android'in kendi kamerası ya da Google Lens `exp://` adreslerini tanımaz ("unsupported QR code" der); Expo Go'daki "Enter URL manually" ile terminaldeki `exp://…` adresi de girilebilir.
+3. Windows bu Wi-Fi'ı "Genel" (Public) ağ sayıyorsa güvenlik duvarı telefonun bağlantısını engelleyebilir; "Node.js'in ağda iletişim kurmasına izin verilsin mi?" sorusuna izin verin ya da tüneli kullanın.
 
 **Aynı ağda değilseniz (tünel):**
 
-1. Bir kez Expo hesabıyla giriş yapın (ücretsiz): `npx expo login`
-2. `npm run start:tunnel`. Uygulama kodu internet üzerinden telefona gelir; telefon mobil veride olsa da çalışır.
-3. Tünel açılmazsa: bilgisayarı telefonun kişisel erişim noktasına (hotspot) bağlayın, ikisi aynı ağda olur ve `npm run start` yeter.
+1. `npm run start:tunnel` (yani `npx expo start --tunnel`). SDK 57'de tünel ngrok ile açılır, Expo hesabı gerekmez; gereken `@expo/ngrok` paketi `mobile/package.json`'da geliştirme bağımlılığı olarak var.
+2. Uygulama kodu internet üzerinden telefona gelir; telefon mobil veride olsa da çalışır. Terminalde "Tunnel ready." yazınca karekodu okutun.
+3. SDK 57'de `--tunnel ngrok` yazmayın; `ngrok` kelimesi proje klasörü sanılır ve "Invalid project root" hatası verir.
+4. Tünel açılmazsa: bilgisayarı telefonun kişisel erişim noktasına (hotspot) bağlayın, ikisi aynı ağda olur ve `npm run start` yeter.
 
 **Kapatmak için:** Terminalde `Ctrl + C`.
 
