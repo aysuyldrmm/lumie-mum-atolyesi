@@ -1,9 +1,7 @@
 import { PRIVACY_POLICY_VERSION } from '../data/privacy.js'
 
-// TASLAK: Hukuki danışmanlık değildir; yayına almadan önce bir hukukçuya
-// kontrol ettirilmelidir. Köşeli parantezli yerler işletme tarafından doldurulur.
-const fill = (text) => <span className="yer-tutucu">[{text}]</span>
-
+// Eğitim projesi için örnek taslak: işletme bilgileri hayalidir ve metin
+// hukuki danışmanlık değildir. Gerçek bir işletmede bir hukukçuya kontrol ettirilmelidir.
 const versionDate = new Date(`${PRIVACY_POLICY_VERSION}T00:00:00Z`).toLocaleDateString('tr-TR', {
   day: 'numeric',
   month: 'long',
@@ -24,6 +22,10 @@ export default function PrivacyPolicy() {
           <p className="ana-sayfa-baglantisi">
             <a href="/">← Ana sayfaya dön</a>
           </p>
+          <p className="egitim-notu">
+            Bu metin bir eğitim projesi için hazırlanmış örnek taslaktır. İçindeki işletme ve
+            iletişim bilgileri hayalidir.
+          </p>
           <p className="gizlilik-tarih">Son güncelleme: {versionDate}</p>
 
           <p>
@@ -34,14 +36,18 @@ export default function PrivacyPolicy() {
 
           <h2>1. Veri sorumlusu</h2>
           <p>
-            Kişisel verileriniz, veri sorumlusu sıfatıyla {fill('işletme unvanı')} tarafından
-            işlenir.
+            Kişisel verileriniz, veri sorumlusu sıfatıyla Lumie Mum Atölyesi – Deniz Aksoy (şahıs
+            işletmesi) tarafından işlenir.
           </p>
           <ul>
-            <li>Adres: {fill('açık adres')}</li>
-            <li>E-posta: {fill('iletişim e-postası')}</li>
-            <li>Telefon: {fill('telefon')}</li>
-            <li>VERBİS kayıt numarası: {fill('varsa kayıt numarası; yoksa bu satırı silin')}</li>
+            <li>Adres: Caferağa Mahallesi, Mumhane Sokak No: 14/2, 34710 Kadıköy / İstanbul</li>
+            <li>E-posta: merhaba@lumie-mum.example</li>
+            <li>Telefon: 0 (216) 555 00 14</li>
+            <li>
+              VERBİS: İşletmemiz, Kişisel Verileri Koruma Kurulu kararlarında belirlenen çalışan
+              sayısı ve yıllık mali bilanço eşiklerinin altında kaldığı için VERBİS’e kayıt
+              yükümlülüğünden muaftır.
+            </li>
           </ul>
 
           <h2>2. Hangi kişisel verileri işliyoruz?</h2>
@@ -87,7 +93,8 @@ export default function PrivacyPolicy() {
             </li>
             <li>
               Verilerinizin yurt dışındaki hizmet sağlayıcılara aktarılması: açık rızanız (KVKK
-              m.9). {fill('Hizmet sağlayıcılarla Kurul’a bildirilmiş standart sözleşme imzalandıysa burada belirtin')}
+              m.9). Düzenli aktarımlar için hizmet sağlayıcılarla Kurul’un yayımladığı standart
+              sözleşmeler imzalanmış ve süresi içinde Kurul’a bildirilmiştir.
             </li>
           </ul>
 
@@ -109,29 +116,34 @@ export default function PrivacyPolicy() {
               kayıtları tutabilir.
             </li>
             <li>
-              <strong>Upstash ({fill('veritabanı bölgesi, ör. ABD / AB')}):</strong> yalnızca IP
-              adresinin, istek sınırı için geçici olarak tutulduğu sayaç.
+              <strong>Upstash (ABD, Kuzey Virginia bölgesi):</strong> yalnızca IP adresinin,
+              istek sınırı için geçici olarak tutulduğu sayaç.
             </li>
             <li>
-              <strong>{fill('webhook / otomasyon servisinin adı ve ülkesi')}:</strong> sipariş ve
-              stok bildirimi kayıtlarının iletildiği ve saklandığı servis.
+              <strong>Make (Çekya, Avrupa Birliği):</strong> sipariş ve stok bildirimi kayıtlarının
+              iletildiği ve sipariş tablomuza aktarıldığı otomasyon servisi.
             </li>
             <li>
-              <strong>Yurt içi:</strong> {fill('kargo firması')} (teslimat için gereken bilgiler),{' '}
-              {fill('mali müşavir / muhasebe')} (fatura için).
+              <strong>Yurt içi:</strong> anlaşmalı kargo firmamız (teslimat için gereken bilgiler)
+              ve serbest muhasebeci mali müşavirimiz (fatura için).
             </li>
           </ul>
           <p>Verilerinizi bunların dışında kimseyle paylaşmıyor ve satmıyoruz.</p>
 
           <h2>6. Verilerinizi ne kadar süre saklıyoruz?</h2>
           <ul>
-            <li>Sipariş kayıtları: {fill('süre, ör. ilgili vergi ve ticaret mevzuatındaki saklama süreleri')}.</li>
             <li>
-              Stok bildirimi talepleri: {fill('ör. ürün stoka girip size haber verilene kadar, en fazla … ay')}.
+              Sipariş ve fatura kayıtları: vergi ve ticaret mevzuatındaki saklama yükümlülükleri
+              nedeniyle 10 yıl.
             </li>
-            <li>Onay kayıtları: {fill('süre, ör. ilgili sipariş kaydıyla aynı süre')}.</li>
+            <li>
+              Stok bildirimi talepleri: ürün stoka girip size haber verilene kadar, en fazla 6 ay.
+            </li>
+            <li>
+              Onay kayıtları: ilgili sipariş ya da stok bildirimi kaydıyla aynı süre.
+            </li>
             <li>Upstash’teki IP sayacı: yaklaşık 2 dakika sonra kendiliğinden silinir.</li>
-            <li>Vercel erişim kayıtları: {fill('Vercel planınıza göre saklama süresi')}.</li>
+            <li>Vercel erişim kayıtları: Vercel’in plan koşullarına göre en fazla 30 gün.</li>
           </ul>
           <p>
             Süre dolduğunda verileriniz silinir, yok edilir ya da anonim hâle getirilir.
@@ -159,16 +171,16 @@ export default function PrivacyPolicy() {
           <p>
             Yurt dışına aktarım için verdiğiniz açık rızayı dilediğiniz zaman geri alabilirsiniz.
             Geri alma, o tarihe kadar yapılan işlemleri etkilemez. Formlarımız bu aktarım olmadan
-            çalışamadığı için, rızanızı geri aldıktan sonra sipariş ve taleplerinizi{' '}
-            {fill('telefon / e-posta gibi alternatif bir kanal')} üzerinden iletebilirsiniz.
+            çalışamadığı için, rızanızı geri aldıktan sonra sipariş ve taleplerinizi 0 (216) 555 00
+            14 numaralı telefondan bize iletebilirsiniz.
           </p>
 
           <h2>8. Nasıl başvurabilirsiniz?</h2>
           <p>
-            Taleplerinizi {fill('başvuru e-postası')} adresine e-posta göndererek ya da{' '}
-            {fill('posta adresi')} adresine yazılı olarak iletebilirsiniz. Başvurunuzu en kısa
-            sürede ve en geç 30 gün içinde ücretsiz olarak sonuçlandırırız (KVKK m.13); işlem ayrıca
-            bir maliyet gerektirirse Kurul’un belirlediği tarifedeki ücret alınabilir.
+            Taleplerinizi kvkk@lumie-mum.example adresine e-posta göndererek ya da 1. bölümdeki
+            adresimize yazılı olarak iletebilirsiniz. Başvurunuzu en kısa sürede ve en geç 30 gün
+            içinde ücretsiz olarak sonuçlandırırız (KVKK m.13); işlem ayrıca bir maliyet
+            gerektirirse Kurul’un belirlediği tarifedeki ücret alınabilir.
           </p>
           <p>
             Başvurunuz reddedilirse, yanıtımızı yetersiz bulursanız ya da süresinde yanıt

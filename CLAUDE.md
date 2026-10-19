@@ -85,7 +85,7 @@ Karttaki düğme stoka göre değişir ve ilgili formu açılır pencerede açar
 
 - İki formda da `ConsentField` bileşeni vardır: üstte kutucuksuz bir aydınlatma satırı, altında varsayılan olarak boş bir açık rıza kutucuğu. Kutucuk yalnızca **yurt dışına aktarım** içindir; aydınlatma ile açık rıza aynı kutucukta birleştirilmez.
 - Kutucuk işaretlenmeden form gönderilemez; sunucu da `consent === true` olmayan isteği `400` ile reddeder.
-- Gizlilik politikası ayrı bir sayfadır: `gizlilik.html` → `src/privacy.jsx` → `src/components/PrivacyPolicy.jsx`. Metin bir **taslaktır**; köşeli parantezli yerler işletme bilgileriyle doldurulmalı ve yayından önce bir hukukçuya kontrol ettirilmelidir.
+- Gizlilik politikası ayrı bir sayfadır: `gizlilik.html` → `src/privacy.jsx` → `src/components/PrivacyPolicy.jsx`. Metin bir eğitim projesi için hazırlanmış **örnek taslaktır**; sayfanın başında bunu belirten bir not vardır ve içindeki işletme bilgileri (ad, adres, telefon, `.example` e-postaları, hizmet sağlayıcı bölgeleri, saklama süreleri) hayalidir. Gerçek bir işletmede bu bilgiler değiştirilmeli ve metin bir hukukçuya kontrol ettirilmelidir.
 - Politika metni değiştiğinde `src/data/privacy.js`'deki `PRIVACY_POLICY_VERSION` güncellenir. Bu tarih sayfada "Son güncelleme" olarak görünür ve her onayla birlikte webhook'a `consentVersion` olarak gider.
 - Yeni bir veri, hizmet sağlayıcı (ör. analiz aracı, çerez) ya da saklama yeri eklenirse gizlilik politikası da güncellenmelidir.
 
