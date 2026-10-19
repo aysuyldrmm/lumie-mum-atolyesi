@@ -5,6 +5,7 @@ Lumie Mum Atölyesi sitesi için hazırlanmıştır. Her maddede kontrolün nas�
 - **Kontrol tarihi:** 19 Ekim 2026
 - **İlk kontrol:** commit `34cf1b1`, deploy `lumie-mum-atolyesi-4vk3isyth`
 - **Son güncelleme:** commit `f029702`, deploy `lumie-mum-atolyesi-8kj1kz3i7`. Alan uzunluğu sınırları (madde 3) ve güvenlik başlıkları (madde 8) eklenip yayında yeniden test edildi.
+- **Telefon uygulaması eklendi:** commit `a8971eb`, deploy `lumie-mum-atolyesi-pkg2t8701` (madde 12; `source` izin listesi madde 3'te).
 - **Kontrol edilen yayın:** https://lumie-mum-atolyesi.vercel.app
 
 **Durum işaretleri:** ✅ tamam · ⚠️ çalışıyor ama sınırı / riski var · ❌ yapılmamış ya da eksik
@@ -24,6 +25,7 @@ Lumie Mum Atölyesi sitesi için hazırlanmıştır. Her maddede kontrolün nas�
 | 9 | Webhook'un kendisinin korunması | ❌ İmza ya da gizli anahtar yok |
 | 10 | Bot koruması | ❌ Yok |
 | 11 | Deploy süreci | ⚠️ GitHub bağlantısı yok, deploy'lar elle yapılıyor |
+| 12 | Telefon uygulaması (`mobile/`) | ✅ Gizli bilgi yok · ⚠️ Expo geliştirme araçlarında bilinen açıklar |
 
 ---
 
@@ -128,6 +130,15 @@ Tarayıcıdan gelen `productName`, `event`, `source`, `consentVersion`, `consent
 
 - **Tarayıcı (yayında):** Ad alanına 150 karakter yazılmaya çalışıldığında alan 100 karakterde duruyor. `maxLength` değerleri: ad 100, telefon 20, e-posta 254.
 - **Gerileme:** 18 e-posta testinin hepsi ve onay kutucuğu testleri, güvenlik başlıklı yerel önizlemede (`npm run preview`) yeniden geçti.
+
+**✅ Kaynak (`source`) izin listesi (commit `a8971eb`).**
+- **Kod:** `src/data/webhook.js`'deki `SOURCES = ['lumie-web', 'lumie-mobile']`. `api/_lib/handle-form.js` istekteki `source`'u yalnızca bu listeden kabul ediyor; gelmezse `lumie-web` sayıyor. Web sitesi hiç `source` göndermediği için bugünkü gibi çalışıyor.
+- **Yerelde (yakalama sunucusuyla):**
+  - `source` yok, `lumie-web` ya da `null` → webhook'a `lumie-web` gitti.
+  - `lumie-mobile` → `lumie-mobile` gitti.
+  - `hacker` ve `["lumie-web"]` (dizi) → `400`.
+  - Web sitesinin formlarından giden 8 kaydın hepsi `lumie-web`.
+- **Yayında (geçersiz isteklerle, webhook'a ulaşmadan):** `hacker` → `400`, dizi → `400`. `lumie-mobile` izin listesinden geçip sonraki kontrollere (ürün, onay) ulaşıyor.
 
 ## 4. Rate limit ⚠️
 
@@ -261,6 +272,47 @@ Tarayıcıdan gelen `productName`, `event`, `source`, `consentVersion`, `consent
 **Öneri:** Vercel panelinde **Settings → Git → Connect Git Repository** ile GitHub bağlantısı kurulsun. Böylece yayına yalnızca `main`'e push'lanmış kod çıkar ve her deploy bir commit'e bağlanır.
 
 ---
+
+## 12. Telefon uygulaması (`mobile/`) ✅ ⚠️
+
+Expo SDK 58 ile yazılmış, Expo Go'da açılan uygulama (commit `a8971eb`). Formlar canlı sitenin API'sine gider, yani madde 3–5'teki sunucu kontrolleri, rate limit ve KVKK onayı uygulama için de geçerli.
+
+**✅ Uygulamada gizli bilgi yok.**
+- **Kaynak kod:** `mobile/src/config.js`'de yalnızca sitenin herkese açık adresi var (`https://lumie-mum-atolyesi.vercel.app`, `EXPO_PUBLIC_API_URL` ile değiştirilebilir). Webhook adresi, Upstash bilgileri ve `process.env.WEBHOOK_URL` uygulama kodunda yok.
+- **Derlenmiş paketler:** `npx expo export --platform android --platform ios` ile üretilen Android ve iOS paketlerinde (Hermes, 1,6 MB) arama yapıldı:
+
+| Aranan | Eşleşen paket |
+|---|---|
+| Test webhook adresi, `webhook.site`, `WEBHOOK_URL`, `KV_REST`, `upstash.io`, `VERCEL_OIDC`, `node-forge` | 0 / 2 |
+| Sitenin adresi, `lumie-mobile` (olması gereken) | 2 / 2 |
+
+- **Paylaşılan veri:** Ürünler, kategoriler, doğrulama ve politika sürümü kökteki `src/data/`'dan geliyor; pakette ürün kimlikleri ve `2026-10-19` sürümü bulundu. Sunucu ile aynı doğrulama kodu kullanılıyor.
+
+**✅ Web sitesi etkilenmedi.**
+- `.vercelignore` ile `mobile/` yayına yüklenmiyor. Deploy yalnızca 50 KB yükledi; `/mobile/App.js` ve `/mobile/package.json` → `404`.
+- Deploy'da yine yalnızca iki fonksiyon var: `api/order`, `api/stock-notification`.
+- `npm run build` çıktısı değişiklikten önce ve sonra aynı 10 dosya; içinde `react-native` ya da `lumie-mobile` izi yok.
+- Yayında güvenlik başlıkları, CSP (0 ihlal), çerçeve engeli ve onaysız gönderim engeli yeniden doğrulandı.
+
+**✅ Uygulama davranışı (tarayıcıda Expo web önizlemesiyle, 390×844, yerel API ve yakalama sunucusuyla):**
+- 3 ürün ve 3 fotoğraf yükleniyor; tükenmiş ürün etiketi görünüyor.
+- Filtre düğmeleri "Tümü", "Kokulu", "Dekoratif" (boş "Kavanoz" gizli) ve süzme doğru.
+- Onay kutucuğu başlangıçta boş (`aria-checked=false`); işaretlemeden gönderilince hata çıkıyor ve **istek gitmiyor**.
+- Ad alanı 100 karakterde duruyor; Türkçe harfli e-posta webdeki mesajla reddediliyor.
+- `429` yanıtında "Kısa sürede çok fazla deneme yapıldı…" mesajı görünüyor, bilgiler silinmiyor.
+- Gizlilik bağlantısı sitenin `/gizlilik.html` sayfasını açıyor.
+- Webhook'a ulaşan iki kayıtta (sipariş ve stok bildirimi) `source: "lumie-mobile"`, onay alanları ve sunucuda temizlenmiş telefon (`05321234567`) var.
+- **Sınır:** Bu testler tarayıcıda yapıldı. Gerçek telefonda, Expo Go'da deneme site sahibinde.
+
+**⚠️ Expo geliştirme araçlarında bilinen açıklar.**
+- `cd mobile && npm audit` → 22 bulgu (7 orta, 15 yüksek). Üç kök neden var: `braces` (≤3.0.3, desen işlemede hizmet engelleme), `node-forge` (≤1.4.0, imza doğrulama) ve `uuid` (<11.1.1).
+- **Etki:** Hepsi Expo CLI ve yapılandırma araçlarının içinde (`@expo/cli`, `@expo/config`…), yani yalnızca geliştiricinin bilgisayarında çalışıyor. Telefondaki uygulama paketine girmiyorlar (`node-forge` aranıp bulunmadı). Kök projenin bağımlılıklarında açık yok (madde 7).
+- **Neden düzeltilmedi:** `expo` zaten en güncel sürümde (58.0.16). `npm audit fix --force` Expo'nun uyumsuz sürümlerini kurup projeyi bozar. Expo yeni bir yama yayınladığında `npx expo install --fix` ile güncellenmeli.
+
+**Not: farklı ağdan bağlanma.**
+- Expo SDK 58'de tünel (`npm run start:tunnel`) Expo hesabıyla giriş istiyor.
+- Giriş istemeyen ngrok tüneli (`--tunnel ngrok`) üç denemede de `TypeError: Cannot read properties of undefined (reading 'body')` hatasıyla açılmadı; bu yüzden kullanılmıyor.
+- Tünel, uygulama kodunu Expo'nun sunucusu üzerinden taşır. Gizli bilgi içermediği için bu bir risk değil.
 
 ## Deploy öncesi kısa kontrol (her seferinde)
 
